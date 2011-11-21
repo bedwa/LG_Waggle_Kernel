@@ -1,8 +1,8 @@
-/* This file is auto generated, version 0 */
+/* This file is auto generated, version 2 */
 /* SMP PREEMPT */
 #define UTS_MACHINE "arm"
-#define UTS_VERSION "#0 SMP PREEMPT Tue Oct 25 01:14:20 EDT 2011"
-#define LINUX_COMPILE_TIME "01:14:20"
+#define UTS_VERSION "#2 SMP PREEMPT Sun Nov 20 23:56:53 EST 2011"
+#define LINUX_COMPILE_TIME "23:56:53"
 #define LINUX_COMPILE_BY "tyler"
 #define LINUX_COMPILE_HOST "tyler-XPS-L501X"
 #define LINUX_COMPILE_DOMAIN "(none)"
