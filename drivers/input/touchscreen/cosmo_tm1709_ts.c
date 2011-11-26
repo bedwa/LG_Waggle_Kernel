@@ -45,10 +45,6 @@ PARTICULAR PURPOSE.  See the * GNU General Public License for more details. * */
 
 //#define COSMO_TA_NOISE_DEBUG 
 
-
-#ifdef COSMO_TOGGLE_MELT_MODE
-//#define COSMO_TOGGLE_MELT_MODE_USE_TIME 
-#endif
 #define COSMO_TOUCHKEY_RANGE_TRIM	// for triming touch event out of touchkey range
 #define COSMO_MORE_THREE_FINGER_SPPORT	
 #define COSMO_SYNAPTICS_SUPPORT_FW_UPGRADE
@@ -58,6 +54,7 @@ PARTICULAR PURPOSE.  See the * GNU General Public License for more details. * */
 #define COSMO_USED_RESET_PIN_IN_SUSPEND
 //#define COSMO_USED_RESET_PIN_IN_SUSPEND_MDELAY
 //#define COSMO_USED_TIMESTAMP
+//#define COSMO_USED_ESD_DETECTION
 
 #define SYNAPTICS_INT_REG		0x50
 #define SYNAPTICS_INT_FLASH		1<<0
@@ -143,16 +140,26 @@ struct synaptics_ts_data {
 	struct timespec	pending_delay_time;
 #endif
 #ifdef COSMO_TOGGLE_MELT_MODE
-	int				melt_toggle_state;
-#ifdef COSMO_TOGGLE_MELT_MODE_USE_TIME
-	struct timespec short_touch_delay_time;
-#else
-	int melt_tap_count;
-//	int melt_distance_X;
-//	int melt_distance_Y;
-#endif
+	uint8_t melt_numfinger;
+	uint8_t melt_tapcount;
+	uint8_t melt_fscc;
+	uint8_t melt_fs0;
+	uint8_t melt_fs1;
+	uint8_t melt_fs2;
+	uint8_t melt_zigcntx;
+	uint8_t melt_zigcnty;
+	uint8_t melt_direction;
+	uint8_t melt_distance;
+	uint8_t melt_mode;
+	int melt_x;
+	int melt_y;
+	int melt_prex;
+	int melt_prey;
+	int melt_firstx;
+	int melt_firsty;
 #endif
 	int duringSuspend;
+	int resetDone;
 };
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
@@ -187,15 +194,8 @@ and other items needed by this module.
 #endif
 
 #ifdef COSMO_TOGGLE_MELT_MODE
-#define COSMO_MELT_IN_MELTMODE			0
-#define COSMO_MELT_TRY_ENTER_NOMELT		1
-#define COSMO_MELT_BLOCK_ENTER_NOMELT	2
-#define COSMO_MELT_IN_NOMELTMODE		3
-
 #define COSMO_MELT_SYNAPTICS_MELT_VALUE		0x01
 #define COSMO_MELT_SYNAPTICS_NOMELT_VALUE	0x00
-
-#define COSMO_MELT_SHORT_TAP_MAX_TIME	2 // 2sec
 #endif
 
 
@@ -516,58 +516,156 @@ static int synaptics_ts_is_more_pressed_touch(int finger_index)
 	return 0;
 }
 
-
-#ifdef COSMO_TOGGLE_MELT_MODE
-static void synaptics_check_meltmode_in_touchdown(struct synaptics_ts_data* ts)
+static void synaptics_ts_NoMeltChange2(struct synaptics_ts_data* ts)
 {
-	if(ts->melt_toggle_state == COSMO_MELT_IN_MELTMODE)
-	{
-		// mode change
-		ts->melt_toggle_state = COSMO_MELT_TRY_ENTER_NOMELT;
+	uint8_t zigoffset = 25;
 
-#ifdef COSMO_TOGGLE_MELT_MODE_USE_TIME
-		// max delay setting
-		ts->short_touch_delay_time = current_kernel_time();
-		ts->short_touch_delay_time.tv_sec += COSMO_MELT_SHORT_TAP_MAX_TIME;			
-#else
-		ts->melt_tap_count = 0;
-//		ts->melt_distance_X = curr_ts_data.X_position[0];
-//		ts->melt_distance_Y = curr_ts_data.Y_position[0];
-#endif
+	if(ts->melt_mode == 1)
+	{
+           if((ts_reg_data.finger_state_reg[0] == 0) & (ts_reg_data.finger_state_reg[1] == 0) & (ts_reg_data.finger_state_reg[2] == 0)) //No finger
+           {
+				  if(ts->melt_numfinger==1) 
+				  {
+					  if(++(ts->melt_tapcount) > 2)
+					  {
+							//clipZ[0] = 0x00;
+							//m_ret = SynaWriteRegister(0xf0, &clipZ[0], 1); //set no melting
+							i2c_smbus_write_byte_data(ts->client, 0xf0, COSMO_MELT_SYNAPTICS_NOMELT_VALUE);
+							DEBUG_MSG("COSMO_MELT_ENTER_NOMELT\n");
+							ts->melt_mode = 2;
+							ts->melt_fscc = 0;
+							ts->melt_tapcount = 0;
+
+							DEBUG_MSG("\nNo melt mode !!!!!!\n");
+					  }
+					  DEBUG_MSG("Tap count = %d\n", ts->melt_tapcount);
+				  }
+				  ts->melt_numfinger=0;
+           }
+           
+           else if((ts_reg_data.finger_state_reg[0] == 1) & (ts_reg_data.finger_state_reg[1] == 0) & (ts_reg_data.finger_state_reg[2] == 0)) // 1 finger
+           {
+				if(ts->melt_numfinger==0)
+                {
+					ts->melt_numfinger=1;
+                }
+           }
+           else
+           {
+				ts->melt_numfinger=2; // more than 2 finger
+				ts->melt_tapcount = 0;
+		   }
 	}
-
-}
-
-static void synaptics_check_meltmode_in_touchup(struct synaptics_ts_data* ts)
-{
-	if(ts->melt_toggle_state == COSMO_MELT_TRY_ENTER_NOMELT && synaptics_ts_is_more_pressed_touch(1) == 0)
+	else if(ts->melt_mode == 2)
 	{
-#ifdef COSMO_TOGGLE_MELT_MODE_USE_TIME	
-		struct timespec cur_time = current_kernel_time();
-		if(timespec_compare(&cur_time,&ts->short_touch_delay_time)>0)
+		if((ts_reg_data.finger_state_reg[0] == 0) & (ts_reg_data.finger_state_reg[1] == 0) & (ts_reg_data.finger_state_reg[2] == 0)) //No finger		
+		{			
+			if(ts->melt_fs0 == 0)
+			{
+				//clipZ[0] = 0x01;
+				//m_ret = SynaWriteRegister(0xf0, &clipZ[0], 1); //set melting
+				i2c_smbus_write_byte_data(ts->client, 0xf0, COSMO_MELT_SYNAPTICS_MELT_VALUE);
+				DEBUG_MSG("COSMO_MELT_ENTER_MELT fs0\n");				
+				ts->melt_mode = 1;
+				ts->melt_tapcount = 2;
+			}
+			ts->melt_fscc=0;
+			ts->melt_fs0 = 0;
+			ts->melt_zigcntx=0; 
+			ts->melt_zigcnty=0;
+
+			if((((ts->melt_direction == 1) | (ts->melt_direction == -1)) & (ts->melt_distance > 3)))
+			{
+				//clipZ[0] = 0x00;
+				//m_ret = SynaWriteRegister(0xf0, &clipZ[0], 1); //set no melting
+				i2c_smbus_write_byte_data(ts->client, 0xf0, COSMO_MELT_SYNAPTICS_NOMELT_VALUE);
+				DEBUG_MSG("COSMO_MELT_ENTER_NOMELT fix\n");				
+				ts->melt_mode = 0;
+			}
+			ts->melt_direction = 0;
+			ts->melt_distance = 0;
+		}
+
+		else if((ts_reg_data.finger_state_reg[0] == 1) & (ts_reg_data.finger_state_reg[1] == 0) & (ts_reg_data.finger_state_reg[2] == 0)) // 1 finger
 		{
-			// timeout
-			ts->melt_toggle_state = COSMO_MELT_IN_MELTMODE;				
+			if(ts->melt_fs0 == 0)
+			{
+				ts->melt_prex = ts->melt_x; ts->melt_prey = ts->melt_y; ts->melt_firstx = ts->melt_x; ts->melt_firsty = ts->melt_y;
+			}
+			else
+			{
+				if(ts->melt_zigcntx % 2)
+				{
+					if(ts->melt_x > ts->melt_prex+zigoffset) ts->melt_zigcntx++;
+				}
+				else
+				{
+					if(ts->melt_x < ts->melt_prex-zigoffset) ts->melt_zigcntx++;
+				}
+
+				if(ts->melt_zigcnty % 2)
+				{
+					if(ts->melt_y > ts->melt_prey+zigoffset) ts->melt_zigcnty++;
+				}
+				else
+				{
+					if(ts->melt_y < ts->melt_prey-zigoffset) ts->melt_zigcnty++;
+				}
+
+				if((ts->melt_zigcntx > 5) | (ts->melt_zigcnty > 5))
+				{
+					//clipZ[0] = 0x01;
+					//m_ret = SynaWriteRegister(0xf0, &clipZ[0], 1); //set melting
+					i2c_smbus_write_byte_data(ts->client, 0xf0, COSMO_MELT_SYNAPTICS_MELT_VALUE);
+					DEBUG_MSG("COSMO_MELT_ENTER_MELT Zigcnt or sameposition \n");	
+					ts->melt_mode = 1;
+					ts->melt_zigcntx=0; ts->melt_zigcnty=0;
+				}
+
+				if(ts->melt_x > ts->melt_prex)
+				{
+					if(ts->melt_prex == ts->melt_firstx) ts->melt_direction = 1;
+					else if(ts->melt_direction == -1) ts->melt_direction = 2;
+					else ts->melt_distance++;
+				}
+				else if(ts->melt_x < ts->melt_prex)
+				{
+					if(ts->melt_prex == ts->melt_firstx) ts->melt_direction = -1;
+					else if(ts->melt_direction == 1) ts->melt_direction = 2;
+					else ts->melt_distance++;
+				}
+
+				ts->melt_prex = ts->melt_x;
+				ts->melt_prey = ts->melt_y;
+
+				DEBUG_MSG("Direction = %d, Distance = %d\n", ts->melt_direction, ts->melt_distance);
+			}
 		}
 		else
-#else
-	
-		if(ts->melt_tap_count++ > 2)// || abs(ts->melt_distance_X - curr_ts_data.X_position[0]) > 140 || abs(ts->melt_distance_Y - curr_ts_data.Y_position[0]) > 140)
-#endif
 		{
-			// short tap
-			ts->melt_toggle_state = COSMO_MELT_IN_NOMELTMODE;
-			//reg set			
-			i2c_smbus_write_byte_data(ts->client, 0xf0, COSMO_MELT_SYNAPTICS_NOMELT_VALUE);	
-			//printk("COSMO_MELT_ENTER_NOMELT\n");
-		}		
-	}
-	else if(ts->melt_toggle_state == COSMO_MELT_BLOCK_ENTER_NOMELT)
-	{
-		ts->melt_toggle_state = COSMO_MELT_IN_MELTMODE;	
+			ts->melt_direction = 2;
+			ts->melt_distance = 0;
+		}
+
+		if((ts->melt_fs0 != ts_reg_data.finger_state_reg[0]) | (ts->melt_fs1 != ts_reg_data.finger_state_reg[1]) | (ts->melt_fs2 != ts_reg_data.finger_state_reg[2]))
+		{
+			if(ts->melt_fscc++ > 5)
+			{
+				//clipZ[0] = 0x01;
+				//m_ret = SynaWriteRegister(0xf0, &clipZ[0], 1); //set melting
+				i2c_smbus_write_byte_data(ts->client, 0xf0, COSMO_MELT_SYNAPTICS_MELT_VALUE);
+				DEBUG_MSG("COSMO_MELT_ENTER_MELT fscc\n");					
+				ts->melt_mode = 1;
+				ts->melt_fscc = 0;
+			}
+			ts->melt_fs0 = ts_reg_data.finger_state_reg[0];
+			ts->melt_fs1 = ts_reg_data.finger_state_reg[1];
+			ts->melt_fs2 = ts_reg_data.finger_state_reg[2];
+			DEBUG_MSG("melt_fscc = %d\n", ts->melt_fscc);
+		}
 	}
 }
-#endif
+
 
 #define ADJUST_INGNORE_LEVEL			3
 
@@ -737,10 +835,10 @@ static int synaptics_handle_single_touch(struct synaptics_ts_data* ts, int finge
 		curr_ts_data.Y_position[finger_index] = (int)TS_SNTS_GET_Y_POSITION(ts_reg_data.Y_high_position_finger0_reg, ts_reg_data.XY_low_position_finger0_reg); 	
 
 		////////////////////////////////////////////////////////////debug //////////////////////////////////////////
-		if(finger_index == 0 && ts->melt_toggle_state == COSMO_MELT_IN_MELTMODE)
-		{
-			printk("touch debug[%d][%d]\n", curr_ts_data.X_position[finger_index], curr_ts_data.Y_position[finger_index]);
-		}
+		//if(finger_index == 0 && ts->melt_mode!=0)
+		//{
+		//	printk("touch debug[%d][%d]\n", curr_ts_data.X_position[finger_index], curr_ts_data.Y_position[finger_index]);
+		//}
 		//////////////////////////////////////////////////////debug////////////////////////////////////////
 
 
@@ -769,18 +867,32 @@ static int synaptics_handle_single_touch(struct synaptics_ts_data* ts, int finge
 
 #if 1
 		//printk("[%s] Before[%d][%d] \n", __func__, curr_ts_data.X_position[finger_index], curr_ts_data.Y_position[finger_index]);
-		synaptics_touch_adjust_position(finger_index, curr_ts_data.X_position[finger_index], curr_ts_data.Y_position[finger_index]);
-		curr_ts_data.X_position[finger_index] = adjust_X[finger_index];
-		curr_ts_data.Y_position[finger_index] = adjust_Y[finger_index];
+		#if 0
+		if(adjust_X[finger_index] != 0 && adjust_X[finger_index] != 0 
+			&& (abs(curr_ts_data.X_position[finger_index]-adjust_X[finger_index]) > 100 || abs(curr_ts_data.Y_position[finger_index]-adjust_Y[finger_index]) > 100) 
+//			&& (adjust_Width[finger_index] < 2 || curr_ts_data.width[finger_index]< 2 || adjust_Pressure[finger_index] < 30)
+			)
+		{
+			adjust_X[finger_index] = curr_ts_data.X_position[finger_index];
+			adjust_Y[finger_index] = curr_ts_data.Y_position[finger_index];	
+			DEBUG_MSG("%s() - 3 [%d]\n", __func__, finger_index);
+			return;		
+		}
+		else
+		#endif
+		{
+			synaptics_touch_adjust_position(finger_index, curr_ts_data.X_position[finger_index], curr_ts_data.Y_position[finger_index]);
+			curr_ts_data.X_position[finger_index] = adjust_X[finger_index];
+			curr_ts_data.Y_position[finger_index] = adjust_Y[finger_index];
+		}		
+
+
 		//printk("[%s] After [%d][%d] \n", __func__, curr_ts_data.X_position[finger_index], curr_ts_data.Y_position[finger_index]);
 #endif
 
 		switch(finger_index)
 		{
 			case 0: //first finger special care
-						#ifdef COSMO_TOGGLE_MELT_MODE
-							synaptics_check_meltmode_in_touchdown(ts);
-						#endif
 				if(curr_ts_data.Y_position[0] >TS_H) {
 							// in button range
 							ret = synaptics_ts_is_more_pressed_touch(finger_index+1);
@@ -872,12 +984,6 @@ static int synaptics_handle_single_touch(struct synaptics_ts_data* ts, int finge
 					//break; <---- disable because below code is shared
 			default: // common handling
 			
-					#ifdef COSMO_TOGGLE_MELT_MODE
-					if(ts->melt_toggle_state != COSMO_MELT_IN_NOMELTMODE)
-					{
-						ts->melt_toggle_state = COSMO_MELT_BLOCK_ENTER_NOMELT;
-					}
-					#endif
 					ret = synaptics_ts_is_more_pressed_touch(finger_index+1);
 			//		curr_ts_data.X_position[1] = (int)TS_SNTS_GET_X_POSITION(ts_reg_data.X_high_position_finger0_reg, ts_reg_data.XY_low_position_finger0_reg);
 		  	//		curr_ts_data.Y_position[1] = (int)TS_SNTS_GET_Y_POSITION(ts_reg_data.Y_high_position_finger0_reg, ts_reg_data.XY_low_position_finger0_reg); 			
@@ -921,12 +1027,6 @@ static int synaptics_handle_single_touch(struct synaptics_ts_data* ts, int finge
 			}
 			#endif		
 			ts->button_state=0;				
-			#ifdef COSMO_TOGGLE_MELT_MODE
-			if(adjust_X[finger_index] != 0 && adjust_Y[finger_index] != 0)
-			{
-				synaptics_check_meltmode_in_touchup(ts);
-			}
-			#endif
 
 #ifdef COSMO_USED_TIMESTAMP				
 			do_gettimeofday(&newtime);
@@ -950,6 +1050,14 @@ static int synaptics_handle_single_touch(struct synaptics_ts_data* ts, int finge
 		DEBUG_MSG("%s() - 3 [%d]\n", __func__, finger_index);
 	}
 
+	if(ts->melt_mode)
+	{
+		ts->melt_x = (ts_reg_data.X_high_position_finger0_reg << 4) | (ts_reg_data.XY_low_position_finger0_reg & 0xf);
+		ts->melt_y = (ts_reg_data.Y_high_position_finger0_reg << 4) | (ts_reg_data.XY_low_position_finger0_reg >>4);
+		
+		synaptics_ts_NoMeltChange2(ts);
+	}
+
 	return ret;	
 }
 
@@ -965,8 +1073,25 @@ static void synaptics_ts_init_delayed_work(struct work_struct *work)
 	ret = i2c_smbus_write_byte_data(ts->client, SYNAPTICS_CONTROL_REG, SYNAPTICS_CONTROL_NOSLEEP);
 
 #ifdef COSMO_TOGGLE_MELT_MODE
-		ts->melt_toggle_state = COSMO_MELT_IN_MELTMODE;
 		ret = i2c_smbus_write_byte_data(ts->client, 0xf0, COSMO_MELT_SYNAPTICS_MELT_VALUE);
+		
+		ts->melt_numfinger = 0;
+		ts->melt_tapcount = 0;
+		ts->melt_fscc = 0;
+		ts->melt_fs0 = 0;
+		ts->melt_fs1 = 0;
+		ts->melt_fs2 = 0;
+		ts->melt_zigcntx = 0;
+		ts->melt_zigcnty = 0;
+		ts->melt_direction = 0;
+		ts->melt_distance = 0;
+		ts->melt_mode = 1;
+		ts->melt_x = 0;
+		ts->melt_y = 0;
+		ts->melt_prex = 0;
+		ts->melt_prey = 0;
+		ts->melt_firstx = 0;
+		ts->melt_firsty = 0;		
 		DEBUG_MSG("COSMO_ENTER_MELT\n");
 #endif
 
@@ -979,6 +1104,7 @@ static void synaptics_ts_init_delayed_work(struct work_struct *work)
 
 
 	i2c_smbus_write_byte_data(ts->client, COSMO_SYNAPTICS_REG_2D_CTRL11,	0x00);
+	ts->resetDone = 1;
 
 }
 
@@ -992,8 +1118,8 @@ static void synaptics_ts_init_delayed_No_Melt_work(struct work_struct *work)
 	DEBUG_MSG("%s() - 3 [%x]\n", __func__, ts);
 
 #ifdef COSMO_TOGGLE_MELT_MODE
-	ts->melt_toggle_state = COSMO_MELT_IN_NOMELTMODE;
 	ret = i2c_smbus_write_byte_data(ts->client, 0xf0, COSMO_MELT_SYNAPTICS_NOMELT_VALUE);
+	ts->melt_mode = 0;
 	DEBUG_MSG("COSMO_MELT_ENTER_NOMELT\n");
 #endif
 
@@ -1058,8 +1184,25 @@ static void synaptics_ts_reset_delayed_work(struct work_struct *work)
 	ret = i2c_smbus_write_byte_data(ts->client, SYNAPTICS_CONTROL_REG, SYNAPTICS_CONTROL_NOSLEEP);
 
 #ifdef COSMO_TOGGLE_MELT_MODE
-		ts->melt_toggle_state = COSMO_MELT_IN_MELTMODE;
 		ret = i2c_smbus_write_byte_data(ts->client, 0xf0, COSMO_MELT_SYNAPTICS_MELT_VALUE);
+		ts->melt_numfinger = 0;
+		ts->melt_tapcount = 0;
+		ts->melt_fscc = 0;
+		ts->melt_fs0 = 0;
+		ts->melt_fs1 = 0;
+		ts->melt_fs2 = 0;
+		ts->melt_zigcntx = 0;
+		ts->melt_zigcnty = 0;
+		ts->melt_direction = 0;
+		ts->melt_distance = 0;
+		ts->melt_mode = 1;
+		ts->melt_x = 0;
+		ts->melt_y = 0;
+		ts->melt_prex = 0;
+		ts->melt_prey = 0;
+		ts->melt_firstx = 0;
+		ts->melt_firsty = 0;	
+
 		DEBUG_MSG("COSMO_ENTER_MELT\n");
 #endif
 
@@ -1080,6 +1223,8 @@ static void synaptics_ts_reset_delayed_work(struct work_struct *work)
 			printk(KERN_ERR "synaptics_ts_suspend: i2c_smbus_write_byte_data failed\n");		
 		return; 	
 	}
+
+	ts->resetDone = 1;
 
 }
 #endif
@@ -1118,7 +1263,11 @@ static void synaptics_ts_work_func(struct work_struct *work)
 	int ret = 0;
 	struct synaptics_ts_data *ts = container_of(work, struct synaptics_ts_data, work);
 
-	ret = i2c_smbus_read_i2c_block_data(ts->client, 0x14, 4, (u8*)&(ts_reg_data.interrupt_status_reg)); 
+#ifdef COSMO_USED_ESD_DETECTION
+	ret = i2c_smbus_read_i2c_block_data(ts->client, SYNAPTICS_DATA_BASE_REG, 0x22-SYNAPTICS_DATA_BASE_REG, (u8*)&(ts_reg_data.device_status_reg)); 
+#else
+	ret = i2c_smbus_read_i2c_block_data(ts->client, SYNAPTICS_INT_STATUS_REG, 0x22-SYNAPTICS_INT_STATUS_REG, (u8*)&(ts_reg_data.interrupt_status_reg)); 
+#endif
 
 #ifdef COSMO_TA_NOISE_DEBUG
 	u8 regData[32];
@@ -1146,9 +1295,24 @@ static void synaptics_ts_work_func(struct work_struct *work)
 	synaptics_dump_register(temp, sizeof(char)*(32*4+2));
 #endif
 
-	DEBUG_MSG("%s() 0x%x [%d]\n", __func__, ts_reg_data.interrupt_status_reg, ret);
+#ifdef COSMO_USED_ESD_DETECTION
+	DEBUG_MSG("%s() -device_status_reg- [0x%x][0x%x] [%d]\n", __func__, ts_reg_data.device_status_reg, ts_reg_data.interrupt_status_reg, ret);
 
-	if(ts_reg_data.interrupt_status_reg & SYNAPTICS_INT_ABS0) {
+	if((ts_reg_data.device_status_reg&0x03) == 0x03)
+	{
+		gpio_direction_output(14, 0);	// OUTPUT 
+		udelay(10);
+		gpio_set_value(14, 1);
+
+		cancel_delayed_work_sync(&ts->reset_delayed_work);
+		schedule_delayed_work(&ts->reset_delayed_work, msecs_to_jiffies(300));	
+		return;
+	}
+#else
+	DEBUG_MSG("%s() -interrupt_status_reg- 0x%x [%d]\n", __func__, ts_reg_data.interrupt_status_reg, ret);
+#endif
+
+	if((ts_reg_data.interrupt_status_reg & SYNAPTICS_INT_ABS0) && ts->resetDone == 1) {
 		int is_next_finger_existed = 0;		// is next finger existed?
 
 		int i = 0;
@@ -1884,8 +2048,6 @@ static int synaptics_ts_probe(
 		schedule_delayed_work(&ts->init_delayed_no_melt_work, msecs_to_jiffies(5000));	
 #endif
 	
-		ts->melt_toggle_state = COSMO_MELT_IN_MELTMODE;
-	
 #ifdef CONFIG_HAS_EARLYSUSPEND
 		ts->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 1;
 		ts->early_suspend.suspend = synaptics_ts_early_suspend;
@@ -1936,6 +2098,7 @@ static int synaptics_ts_suspend(struct i2c_client *client, pm_message_t mesg)
 	int ret;
 	struct synaptics_ts_data *ts = i2c_get_clientdata(client);
 	ts->duringSuspend = 1;
+	ts->resetDone = 0;
 	ret = cancel_work_sync(&ts->work);
 	if (ret && ts->use_irq) {
 		printk(KERN_ERR "TouchScreen-tm709 Suspend Failed\n");
@@ -2030,9 +2193,6 @@ static int synaptics_ts_resume(struct i2c_client *client)
 #else
 
 	schedule_delayed_work(&ts->init_delayed_work, msecs_to_jiffies(200));
-
-	ts->melt_toggle_state = COSMO_MELT_IN_MELTMODE;
-
 #endif
 	return 0;
 }

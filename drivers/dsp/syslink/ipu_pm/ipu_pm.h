@@ -134,7 +134,7 @@
 #define GP_TIMER_4 4
 #define GP_TIMER_9 9
 #define GP_TIMER_11 11
-#define NUM_IPU_TIMERS 2
+#define NUM_IPU_TIMERS 1
 
 #define I2C_SL_INVAL -1
 #define I2C_1_SL 0
@@ -225,7 +225,7 @@
 #define SYS_PROC_DOWN		0x00010000
 #define APP_PROC_DOWN		0x00020000
 #define ENABLE_SELF_HIB		0x00000040
-#define START_HIB_FLAG		0x00010001
+#define START_HIB_FLAG		0x1
 
 #define SYS_PROC_HIB		0x00000001
 #define APP_PROC_HIB		0x00000002
@@ -251,7 +251,6 @@
 #define ONLY_APPM3_IDLE		0x2
 #define ONLY_SYSM3_IDLE		0x1
 #define ALL_CORES_IDLE		0x3
-//#define WAIT_FOR_IDLE_TIMEOUT	40u
 #define WAIT_FOR_IDLE_TIMEOUT	500u
 
 /* Macro to make a correct module magic number with refCount */
@@ -371,14 +370,15 @@ union message_slicer {
 };
 
 struct ipu_pm_override {
-	unsigned hibernateAllowed:1;
-	unsigned retentionAllowed:1;
-	unsigned inactiveAllowed:1;
-	unsigned cmAutostateAllowed:1;
-	unsigned deepSleepAllowed:1;
-	unsigned wfiAllowed:1;
-	unsigned idleAllowed:1;
-	unsigned reserved:24;
+	unsigned hibernate_allowed:1;
+	unsigned retention_allowed:1;
+	unsigned inactive_allowed:1;
+	unsigned cm_autostate_allowed:1;
+	unsigned deep_sleep_allowed:1;
+	unsigned wfi_allowed:1;
+	unsigned idle_allowed:1;
+	unsigned wdt_allowed:1;
+	unsigned reserved:23;
 	unsigned highbit:1;
 };
 
@@ -430,7 +430,8 @@ struct sms {
 	struct rcb_block rcb[RCB_MAX];
 	struct ms_agent_block ms_agent[3];
 	struct event_int event_int;
-	unsigned hib_flag;
+	unsigned hib_flag_sysm3;
+	unsigned hib_flag_appm3;
 };
 
 struct pm_event {

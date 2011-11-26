@@ -42,7 +42,7 @@
 #define SYS_SGX_CLOCK_SPEED 304742400
 #endif
 #if defined(CONFIG_SGX_REV120)
-#define SYS_SGX_CLOCK_SPEED       307200000
+#define SYS_SGX_CLOCK_SPEED       384000000
 #endif
 #endif
 #endif

@@ -1,7 +1,7 @@
 TODO:
 
 1. Step up and maintain this driver to ensure that it continues
-to work.  Having the hardware for this is pretty much a
+to work  Having the hardware for this is pretty much a
 requirement.  If this does not happen, the will be removed in
 the 2.6.35 kernel release.
 

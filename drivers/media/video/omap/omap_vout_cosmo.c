@@ -2279,6 +2279,12 @@ static void omap_vout_display(struct work_struct *work)
 		//Display
 		curFrame->state = VIDEOBUF_ACTIVE;
 
+		mutex_lock(&vout->in_display_operation);
+
+		mutex_lock(&vout->lock);
+		streaming_status = vout->streaming_status;
+		mutex_unlock(&vout->lock);
+
 		//omap_vout_display_xxx() function wil check current display information,
 		//and determine their action in inside function
 		if ( streaming_status!=E_STREAMING_NO_DRAW)
@@ -2297,6 +2303,8 @@ static void omap_vout_display(struct work_struct *work)
 		{
 			DBG_PRINTK("NOT DRAW skip frame\n");
 		}
+
+		mutex_unlock(&vout->in_display_operation);
 
 		// LGE_CHANGE [darren.kang@lge.com] last frame logic change
 		if(vout->queing_info.displaying_frame == curFrame)
@@ -3501,10 +3509,12 @@ static void vidioc_disable_suspend(struct early_suspend *h)
 	struct omap_vout_device *vout;
 	vout = container_of(h, struct omap_vout_device, fb_disable_suspend_handler);
 	DBG_PRINTK("Disable FB early suspend in vout\n");
+	mutex_lock(&vout->in_display_operation);
 	mutex_lock(&vout->lock);
 	//disable overlays
 	vidioc_disable_layers_locked(&vout->vid_info);
 	mutex_unlock(&vout->lock);
+	mutex_unlock(&vout->in_display_operation);
 }
 
 static void vidioc_disable_resume(struct early_suspend *h)
@@ -3878,6 +3888,7 @@ static int __init omap_vout_setup_video_data(struct omap_vout_device *vout)
 	vfd->fops = &omap_vout_fops;
 	vfd->v4l2_dev = &vout->vid_dev->v4l2_dev;
 	mutex_init(&vout->lock);
+	mutex_init(&vout->in_display_operation);
 
 	//buffer manager init
 	omap_vout_vram_buffer_manager_init(&vout->buffer_manager);
@@ -4031,6 +4042,7 @@ static void omap_vout_cleanup_device(struct omap_vout_device *vout)
 
 	//de-init buffer manager
 	omap_vout_vram_buffer_manager_deinit(&vout->buffer_manager);
+	mutex_destroy(&vout->in_display_operation);
 	mutex_destroy(&vout->lock);
 	kfree(vout);
 }

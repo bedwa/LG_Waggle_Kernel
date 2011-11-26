@@ -61,6 +61,23 @@ int mmc_send_io_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
 		mmc_delay(10);
 	}
 
+#if 0	/* JamesLee :: Jun17 */
+	if(err != 0)
+	{
+		printk("@@@@@@@@%s(index=%d), err = %d\n", __func__, host->index, err);
+		if(host->index==2)
+		{
+			printk("SYSCONFIG=0x%8x, SYSSTATUS=0x%8x, SYSCTL=0x%8x, STAT=0x%8x, HCTL=0x%8x\n",
+				omap_readl(0x480d5110),
+				omap_readl(0x480d5114),
+				omap_readl(0x480d522c),
+				omap_readl(0x480d5230),
+				omap_readl(0x480d5228));
+			printk("MMCSD5_CLKCTRL=0x%x\n", omap_readl(0x4a009560));
+		}
+	}
+#endif
+
 	if (rocr)
 		*rocr = cmd.resp[mmc_host_is_spi(host) ? 1 : 0];
 

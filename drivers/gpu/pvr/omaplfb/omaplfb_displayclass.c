@@ -836,6 +836,7 @@ static PVRSRV_ERROR CreateDCSwapChain(IMG_HANDLE hDevice,
 	}
 	
 	/* LGE_CHANGE_S [wonki.choi@lge.com] Overlay Refactoring 2011-1-24*/
+	mutex_init(&psSwapChain->stHdmiTiler.lock);
 	psSwapChain->stHdmiTiler.alloc = false;
 	psSwapChain->stHdmiTiler.overlay = omap_dss_get_overlay(1);
 	{
@@ -923,6 +924,7 @@ static PVRSRV_ERROR DestroyDCSwapChain(IMG_HANDLE hDevice,
 		tiler_free(psSwapChain->stHdmiTiler.pAddr);
 		psSwapChain->stHdmiTiler.alloc = false;
 	}
+	mutex_destroy(&psSwapChain->stHdmiTiler.lock);
 	/* LGE_CHANGE_E [wonki.choi@lge.com] 2011-1-24 */
 	return PVRSRV_OK;
 }
@@ -1302,12 +1304,14 @@ void OMAPLFBDriverSuspend(void)
 
 		/* LGE_CHANGE_S [taekeun1.kim@lge.com] 2011-03-30 */
 		if(psDevInfo->psSwapChain != NULL) {
+			mutex_lock(&psDevInfo->psSwapChain->stHdmiTiler.lock);
 			if(psDevInfo->psSwapChain->stHdmiTiler.alloc)
 			{
 				extern void FreeTilerForHdmi(OMAPLFB_SWAPCHAIN *psSwapChain);
 				FreeTilerForHdmi(psDevInfo->psSwapChain);
 				printk("DOLCOM : free hdmi alloc memory\n");
 			}
+			mutex_unlock(&psDevInfo->psSwapChain->stHdmiTiler.lock);
 		}
 		/* LGE_CHANGE_E [taekeun1.kim@lge.com] 2011-03-30 */
 
@@ -1343,6 +1347,18 @@ void OMAPLFBDriverResume(void)
 
 		mutex_unlock(&psDevInfo->sSwapChainLockMutex);
 	}
+	/* LGE_CHANGE_S [wonki.choi@lge.com] Tiler occupy 2011-06-14*/
+	if(psDevInfo->psSwapChain != NULL) {
+		mutex_lock(&psDevInfo->psSwapChain->stHdmiTiler.lock);
+		if ( !psDevInfo->psSwapChain->stHdmiTiler.alloc )
+		{
+			extern int AllocTilerForHdmi(OMAPLFB_SWAPCHAIN *psSwapChain, OMAPLFB_DEVINFO *psDevInfo);
+			if ( AllocTilerForHdmi(psDevInfo->psSwapChain, psDevInfo) )
+				ERROR_PRINTK("Alloc tiler memory for HDMI GUI cloning failed during creating swap chain\n");
+		}
+		mutex_unlock(&psDevInfo->psSwapChain->stHdmiTiler.lock);
+	}
+	/* LGE_CHANGE_E [wonki.choi@lge.com] 2011-1-24 */
 }
 #endif /* defined(LDM_PLATFORM) */
 

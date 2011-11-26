@@ -1338,7 +1338,7 @@ static int omap_dss_mgr_apply(struct omap_overlay_manager *mgr)
 			struct s3d_disp_info s3d_info;
 			for (i = 0; i < omap_dss_get_num_overlays(); i++) {
 				ovl = omap_dss_get_overlay(i);
-				if ( !ovl->info.enabled || ovl->manager != mgr )
+				if ( !ovl->info.enabled || ovl->manager != mgr || ovl->info.out_wb )
 					continue;
 				s3d_type |= ovl->info.s3d_type;
 			}

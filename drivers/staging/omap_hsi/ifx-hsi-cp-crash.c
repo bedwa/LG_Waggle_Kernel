@@ -65,7 +65,11 @@ int IFX_CP_CRASH_DUMP_INIT(void *dev)
 	 * muic_interrupt_handler merely calls schedule_work() with muic_wq_func().
 	 * muic_wq_func() actually performs the accessory detection.
 	 */
+#ifdef CONFIG_MACH_LGE_COSMO_DOMASTIC
+	ret = request_irq(gpio_to_irq(CP_CRASH_INT_N), CP_CRASH_interrupt_handler, IRQF_TRIGGER_FALLING, "cp_crash_irq", dev);
+#else
 	ret = request_irq(gpio_to_irq(CP_CRASH_INT_N), CP_CRASH_interrupt_handler, IRQF_TRIGGER_RISING, "cp_crash_irq", dev);
+#endif
 	if (ret < 0) {
 		printk(KERN_INFO "[CP CRASH IRQ] GPIO#%03d IRQ line set up failed!\n", CP_CRASH_INT_N);
 		free_irq(gpio_to_irq(CP_CRASH_INT_N), dev);

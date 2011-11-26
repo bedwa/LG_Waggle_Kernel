@@ -44,6 +44,9 @@
 #include <plat/mmc.h>
 #include <plat/cpu.h>
 
+#include <linux/i2c/twl.h>
+
+
 #define VS18			(1 << 26)
 #define VS30			(1 << 25)
 #define SDVS18			(0x5 << 9)
@@ -211,6 +214,7 @@ struct omap_hsmmc_host {
 	int			use_reg;
 	int			req_in_progress;
 	int			tput_constraint;
+	int 		equip_status;
 
 	struct	omap_mmc_platform_data	*pdata;
 };
@@ -357,6 +361,135 @@ int omap_hsmmc_regulator_force_refresh(struct mmc_host *mmc)
 #endif	//CONFIG_MACH_LGE_MMC_REFRESH
 //FW KIMBYUNGCHUL 20110414 [END]
 
+#ifdef CONFIG_MACH_LGE_MMC_ALWAYSON
+int sdpower_status = 0;  // 0: OFF, 1:ON
+
+static void regulator_direct_control(int on_off)
+{
+	if (on_off == 1) // request ON
+	{
+		twl_i2c_write_u8(0x0D, 0x01, 0x98);
+		twl_i2c_write_u8(0x0D, 0x3F, 0x99);
+		twl_i2c_write_u8(0x0D, 0x21, 0x9A);		
+	}
+	else if( on_off == 0 ) // request OFF
+	{
+		twl_i2c_write_u8(0x0D, 0x00, 0x98);
+		twl_i2c_write_u8(0x0D, 0x00, 0x99);//twl_i2c_write_u8(0x0D, 0x3F, 0x99);
+		twl_i2c_write_u8(0x0D, 0x00, 0x9A); 		
+	}
+}
+
+static int omap_hsmmc_1_set_power(struct device *dev, int slot, int power_on,int vdd)
+{
+	struct omap_hsmmc_host *host =
+		platform_get_drvdata(to_platform_device(dev));
+	int ret;
+
+	int pin_status = 0;
+
+	pin_status = omap_hsmmc_get_detect_pin_state(host);
+
+	//printk("\n\n###############>>> set power function called pin (status:%d),(current:%d),request:%d \n\n",pin_status,sdpower_status,power_on);
+
+	if(pin_status!=1) // sdcard NOT present
+	{
+
+		if(sdpower_status) // check current status : ON
+		{
+			if (mmc_slot(host).before_set_reg)
+				mmc_slot(host).before_set_reg(dev, slot, 0, 0);
+
+			regulator_direct_control(0);	
+
+			ret = mmc_regulator_set_ocr(host->vcc, 0);		
+			
+			if (!ret) 
+				sdpower_status = 0;
+
+			if (mmc_slot(host).after_set_reg)
+			mmc_slot(host).after_set_reg(dev, slot, 0, 0);		
+
+			//printk("\n(SD not present)+++++++++++++++++++++++> current status : ON so turn off the regulator\n");
+			
+			//if(ret != 0)
+			//	printk("\n!!!!!!!!!!!!!!!!!>>>>>>>>>>>>>>>>>>  SET OCR fail\n");
+			
+			return ret;
+
+		}
+		else				// check current status : OFF
+		{
+			//printk("\n(SD not present)+++++++++++++++++++++++> current status : OFF so skip\n");
+			return 0;
+		}
+			
+	}
+
+
+	if((host->suspended) != 1) // not suspend case! do control regulator ON,OFF regularly
+	{
+		//printk("\n++++++++++++++++++> this is NOT suspend case");
+		if (mmc_slot(host).before_set_reg)
+			mmc_slot(host).before_set_reg(dev, slot, power_on, vdd);
+
+		if (power_on)	// on
+		{
+			//printk("		regulator ON\n");
+			
+			regulator_direct_control(1);
+
+			ret = mmc_regulator_set_ocr(host->vcc, vdd);
+			
+			if (!ret) 
+				sdpower_status = 1;
+			
+		}
+		else			// off
+		{
+			//printk("		regulator OFF\n");
+
+			regulator_direct_control(0);
+
+			ret = mmc_regulator_set_ocr(host->vcc, 0);
+
+			if (!ret) 
+				sdpower_status = 0;
+						
+		}
+
+		if (mmc_slot(host).after_set_reg)
+			mmc_slot(host).after_set_reg(dev, slot, power_on, vdd);
+
+	}
+	else	// suspend case! ON is allowed , OFF is not allowed
+	{
+		//printk("\n++++++++++++++++++> this is suspend case DO NOT HANDLE regulator");
+
+		if(power_on)
+		{
+			if (mmc_slot(host).before_set_reg)
+				mmc_slot(host).before_set_reg(dev, slot, power_on, vdd);
+
+			//printk("	except regulator ON control in suspend state, SO do turn on regulator!!\n");
+
+			regulator_direct_control(1);
+
+			ret = mmc_regulator_set_ocr(host->vcc, vdd);
+
+			if (!ret) 
+				sdpower_status = 1;
+						
+			if (mmc_slot(host).after_set_reg)
+				mmc_slot(host).after_set_reg(dev, slot, power_on, vdd);
+		}
+
+		ret = 0;
+	}
+	
+	return ret;
+}
+#else
 static int omap_hsmmc_1_set_power(struct device *dev, int slot, int power_on,
 				  int vdd)
 {
@@ -377,6 +510,7 @@ static int omap_hsmmc_1_set_power(struct device *dev, int slot, int power_on,
 
 	return ret;
 }
+#endif
 
 static int omap_hsmmc_23_set_power(struct device *dev, int slot, int power_on,
 				   int vdd)
@@ -1482,6 +1616,7 @@ static irqreturn_t omap_hsmmc_cd_handler(int irq, void *dev_id)
 
 	if (host->suspended)
 		return IRQ_HANDLED;
+
 	schedule_work(&host->mmc_carddetect_work);
 
 	return IRQ_HANDLED;
@@ -1925,8 +2060,8 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 				 * vdd 1.8v.
 				 */
 			if (omap_hsmmc_switch_opcond(host, ios->vdd) != 0)
-				dev_dbg(mmc_dev(host->mmc),
-						"Switch operation failed\n");
+				dev_dbg(mmc_dev(host->mmc),"Switch operation failed\n");
+			
 		}
 
 	if (ios->clock) {
@@ -2550,6 +2685,7 @@ static int __init omap_hsmmc_probe(struct platform_device *pdev)
 
 	pm_runtime_enable(host->dev);
 
+
 	if (mmc_host_enable(host->mmc) != 0)
 		goto err1;
 
@@ -2844,19 +2980,16 @@ static int omap_hsmmc_suspend(struct device *dev)
 		}
 		cancel_work_sync(&host->mmc_carddetect_work);
 		mmc_host_enable(host->mmc);
+
 		ret = mmc_suspend_host(host->mmc);
+
+		
 		if (ret == 0) {
 
-#ifdef CONFIG_MACH_LGE_MMC_ALWAYSON
-			if(strncmp(mmc_hostname(host->mmc),"mmc1",4))
-				{
-#endif				
-					omap_hsmmc_disable_irq(host);
-					OMAP_HSMMC_WRITE(host, HCTL,OMAP_HSMMC_READ(host, HCTL) & ~SDBP);
-					mmc_host_disable(host->mmc);
-#ifdef CONFIG_MACH_LGE_MMC_ALWAYSON
-				}
-#endif
+			omap_hsmmc_disable_irq(host);
+			OMAP_HSMMC_WRITE(host, HCTL,OMAP_HSMMC_READ(host, HCTL) & ~SDBP);
+			mmc_host_disable(host->mmc);
+
 			if (host->got_dbclk)
 				clk_disable(host->dbclk);
 			
@@ -2889,6 +3022,7 @@ static int omap_hsmmc_resume(struct device *dev)
 	struct platform_device *pdev = to_platform_device(dev);
 	struct omap_hsmmc_host *host = platform_get_drvdata(pdev);
 
+
 	if (host && !host->suspended)
 		return 0;
 
@@ -2903,22 +3037,16 @@ static int omap_hsmmc_resume(struct device *dev)
 	  {
 
 	  #endif 	//20110430 FW1 KIMBYUNGCHUL SD_CARD_LOCKUP_IN_omap_hsmmc_resume_FUNC	[END]
-	  
+
+
 		if (mmc_host_enable(host->mmc) != 0)
 			goto clk_en_err;
 
 		if (host->got_dbclk)
 			clk_enable(host->dbclk);
 
-#ifdef CONFIG_MACH_LGE_MMC_ALWAYSON
-		if(strncmp(mmc_hostname(host->mmc),"mmc1",4))
-			{
-#endif			
-				omap_hsmmc_conf_bus_power(host);
+		omap_hsmmc_conf_bus_power(host);
 
-#ifdef CONFIG_MACH_LGE_MMC_ALWAYSON
-			}
-#endif
 
 		if (host->pdata->resume) {
 			ret = host->pdata->resume(&pdev->dev, host->slot_id);
@@ -2928,8 +3056,10 @@ static int omap_hsmmc_resume(struct device *dev)
 		}
 		omap_hsmmc_protect_card(host);
 
+		
 		/* Notify the core to resume the host */
 		ret = mmc_resume_host(host->mmc);
+		
 		if (ret == 0)
 			host->suspended = 0;
 
@@ -2959,8 +3089,7 @@ static int omap_hsmmc_resume(struct device *dev)
 	  }
 	  #endif	  //20110430 FW1 KIMBYUNGCHUL SD_CARD_LOCKUP_IN_omap_hsmmc_resume_FUNC	  [END]
 
-
-		mmc_host_lazy_disable(host->mmc);
+			mmc_host_lazy_disable(host->mmc);
 	}
 
 	return ret;

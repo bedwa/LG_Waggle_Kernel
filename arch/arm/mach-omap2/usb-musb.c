@@ -76,7 +76,7 @@ static struct musb_hdrc_config musb_config = {
 #define LGE_USB_RNDIS_MDM_DIAG_GPS_UMS_ADB_PRODUCT_ID	0x61D7
 
 #define LGE_USB_VENDOR_NAME	"LG Electronics. Inc"
-#define LGE_COSMO_USB_DEVICE_NAME "Cosmo"
+#define LGE_COSMO_USB_DEVICE_NAME "Android"
 #elif defined (CONFIG_LGE_USB_4_LINUX_HOST)  // for LINUX PC
 #define LGE_USB_VENDOR_ID  		0x0bb4
 #define LGE_USB_PRODUCT_ID 		0x0c03
@@ -318,7 +318,7 @@ static struct usb_mass_storage_platform_data usbms_plat = {
 // LGE_UPDATE_S
 #if  defined ( CONFIG_LGE_ANDRIOD_USB)
 	.vendor		= "LGE", // hunsoo.lee "Texas Instruments Inc.",
-	.product	= "Cosmo", // "OMAP4",
+	.product	= "Android", // "OMAP4",
 	.release	= 1,
 	.nluns		= 2, // hunsoo.lee 1,
 #else

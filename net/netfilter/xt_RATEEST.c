@@ -40,38 +40,6 @@ static void xt_rateest_hash_insert(struct xt_rateest *est)
 	hlist_add_head(&est->list, &rateest_hash[h]);
 }
 
-struct xt_rateest *xt_rateest_lookup(const char *name)
-{
-	struct xt_rateest *est;
-	struct hlist_node *n;
-	unsigned int h;
-
-	h = xt_rateest_hash(name);
-	mutex_lock(&xt_rateest_mutex);
-	hlist_for_each_entry(est, n, &rateest_hash[h], list) {
-		if (strcmp(est->name, name) == 0) {
-			est->refcnt++;
-			mutex_unlock(&xt_rateest_mutex);
-			return est;
-		}
-	}
-	mutex_unlock(&xt_rateest_mutex);
-	return NULL;
-}
-EXPORT_SYMBOL_GPL(xt_rateest_lookup);
-
-void xt_rateest_put(struct xt_rateest *est)
-{
-	mutex_lock(&xt_rateest_mutex);
-	if (--est->refcnt == 0) {
-		hlist_del(&est->list);
-		gen_kill_estimator(&est->bstats, &est->rstats);
-		kfree(est);
-	}
-	mutex_unlock(&xt_rateest_mutex);
-}
-EXPORT_SYMBOL_GPL(xt_rateest_put);
-
 static unsigned int
 xt_rateest_tg(struct sk_buff *skb, const struct xt_action_param *par)
 {

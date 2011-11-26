@@ -105,4 +105,13 @@ extern long st_register(struct st_proto_s *new_proto);
 extern long st_unregister(channel_t channelid);
 extern long st_write(struct sk_buff *skb);
 
+#if 0
+//#define SHOW_ST_LOG
+#define ST_LOG(fmt, arg...)  printk(KERN_ERR "(st):"fmt"\n" , ## arg)
+#define ST_LOG_X(fmt, arg...)
+#else
+#define ST_LOG(fmt, arg...)
+#define ST_LOG_X(fmt, arg...)
+#endif
+
 #endif /* ST_H */

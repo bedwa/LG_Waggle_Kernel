@@ -39,7 +39,9 @@ enum lge_dynamic_nvdata_offset {
 	//LGE_S woosock.yang@lge.com 20110512
 	LGE_NVDATA_DYNAMIC_HARD_RESET_OFFSET = 526, 
 	//LGE_E
-	
+
+	LGE_NVDATA_DYNAMIC_RTC_INIT_OFFSET = 528,
+
 	LGE_NVDATA_DYNAMIC_910K_DETECT_OFFSET	= 1024,  // used size 1 byte
 
 	LGE_NVDATA_DYNAMIC_QEM_OFFSET			= 2048, //length 4    ==> move to static nvdata

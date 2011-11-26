@@ -107,6 +107,7 @@ ssize_t hciif_read(struct file *file, char __user *data, size_t size,
 	int len = 0;
 	struct sk_buff *skb = NULL;
 	struct hciif_client *client;
+	u8 i;//hsyoon 20110604
 
 	unsigned long timeout = HCIIFDRV_READ_TIMEOUT;
 
@@ -186,7 +187,12 @@ ssize_t hciif_read(struct file *file, char __user *data, size_t size,
 		HCIIFDRV_DBG(" %x ", skb->data[len]);
 #endif
 
-	HCIIFDRV_VER(" Before copying to user...");
+
+#if defined(SHOW_ST_LOG) //hsyoon 20110605 -remove log
+	printk("%s(%d) : %x %x %x %x %x\n", __func__, size, skb->data[0],skb->data[1],skb->data[2],skb->data[3],skb->data[4]);
+#endif
+
+	//HCIIFDRV_VER(" Before copying to user...");//hsyoon 20110604
 	/* Forward the data to the user --> case (skb->len <= size)*/
 #if 1    /* TIK_BT OPP fail issue */
 	spin_lock(&client->rx_lock);
@@ -214,7 +220,7 @@ ssize_t hciif_read(struct file *file, char __user *data, size_t size,
 	}
 #endif
 
-	HCIIFDRV_VER(" After copying to user...");
+	//HCIIFDRV_VER(" After copying to user...");//hsyoon 20110604
 	len = skb->len;
 	kfree_skb(skb);
 
@@ -239,6 +245,7 @@ ssize_t hciif_write(struct file *file, const char __user *data,
 {
 	struct hciif_client 	*client;
 	struct sk_buff 		*skb;
+	u8 i;//hsyoon 20110604
 
 	HCIIFDRV_DBG(" Inside %s", __func__);
 
@@ -247,6 +254,9 @@ ssize_t hciif_write(struct file *file, const char __user *data,
 		HCIIFDRV_ERR("Invalid input parameters passed to %s", __func__);
 		return -EINVAL;
 	}
+#if defined(SHOW_ST_LOG) //hsyoon 20110605 -remove log
+	printk("%s(%d) : %x %x %x %x %x\n", __func__, size, data[0],data[1],data[2],data[3],data[4]);
+#endif
 
 	client = file->private_data;
 
@@ -346,12 +356,13 @@ static int hciif_ioctl(struct inode *inode, struct file *file,
         {
             struct hciif_filter_t   filter;
 			/* Indicates to bring up the device for the channels and events that are sent as an argument */
+			ST_LOG("HCIIF_IOCTL_DEVUP is received!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
 			HCIIFDRV_VER(" IOCTL HCIIF_IOCTL_DEVUP invoked");
             copy_from_user(&filter, arg, sizeof(struct hciif_filter_t));
             retCode = hciif_dev_up(file, &filter, NULL, &tmp);
         }
 
-		break;
+		break;	
 
 		default:
 			HCIIFDRV_DBG("Un-Identified command provided for IOCTL");
@@ -781,6 +792,7 @@ int hciif_dev_down(struct hciif_client *client)
 		if(test_bit(i, &chan_mask))
 		{
 			HCIIFDRV_VER("Performing ST un-registration from Channel %d", i);
+			ST_LOG("Performing ST un-registration from Channel %d\n", i);
 					
 			if (st_unregister(hciif_proto[i].channelid) < 0) 
 			{
@@ -820,15 +832,15 @@ long hciif_send_frame(struct sk_buff *skb, struct hciif_client *client)
 	if(skb->data[0] == HCIIF_CHAN_CMD)
 	{
 		client->cmd_opcode = *((uint16_t *)(&skb->data[1]));
-                HCIIFDRV_VER("Client 0x%08x, command opcode 0x%04x", (unsigned int)client, client->cmd_opcode);
+		HCIIFDRV_VER("Client 0x%08x, command opcode 0x%04x", (unsigned int)client, client->cmd_opcode);
 
-                /* HCI Host Number Of Completed Packets command does not generate event */
-                if (client->cmd_opcode != HCIIF_CMD_HOST_NUM_OF_CMPLT_PKTS)
-                {
-		        spin_lock(&hhciif->hciif_lock);
-		        list_add_tail(&(client->list), &(hhciif->hciif_WriteClientsList.list));
-		        spin_unlock(&hhciif->hciif_lock);
-	        }
+		/* HCI Host Number Of Completed Packets command does not generate event */
+		if (client->cmd_opcode != HCIIF_CMD_HOST_NUM_OF_CMPLT_PKTS)
+		{
+			spin_lock(&hhciif->hciif_lock);
+			list_add_tail(&(client->list), &(hhciif->hciif_WriteClientsList.list));
+			spin_unlock(&hhciif->hciif_lock);
+		}
 	}
 	
 	return st_write(skb);

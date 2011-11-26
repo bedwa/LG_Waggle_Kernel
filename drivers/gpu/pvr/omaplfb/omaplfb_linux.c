@@ -702,14 +702,15 @@ static void OMAPLFBFliepNoLock_HDMI(OMAPLFB_SWAPCHAIN *psSwapChain,
 
 	if ( info.enabled )
 	{
+		mutex_lock(&psSwapChain->stHdmiTiler.lock);
 		if ( !psSwapChain->stHdmiTiler.alloc )
 		{
-			if ( AllocTilerForHdmi(psSwapChain, psDevInfo) ) {
+//			if ( AllocTilerForHdmi(psSwapChain, psDevInfo) ) {
 
-				ERROR_PRINTK("Alloc tiler memory for HDMI GUI cloning failed\n");
-				printk("DOLCOM : return tiler alloc\n");
+				ERROR_PRINTK("Tiler memory for HDMI GUI cloning is not allocated\n");
+				mutex_unlock(&psSwapChain->stHdmiTiler.lock);
 				return;
-			}
+//			}
 		}
 
 		if ( psSwapChain->stHdmiTiler.alloc )	//if Tiler memory is allocated
@@ -831,6 +832,7 @@ static void OMAPLFBFliepNoLock_HDMI(OMAPLFB_SWAPCHAIN *psSwapChain,
 			}
 
 		} //end of copy & set
+		mutex_unlock(&psSwapChain->stHdmiTiler.lock);
 	} //overlay enabled
 	else
 	{
@@ -859,9 +861,6 @@ static void OMAPLFBFliepNoLock_HDMI(OMAPLFB_SWAPCHAIN *psSwapChain,
 	bool overlay_change_requested = false;
 	enum omap_dss_overlay_s3d_type  s3d_type_in_video_hdmi = omap_dss_overlay_s3d_none;
 
-	ovl_hdmi = omap_dss_get_overlay(3);
-	if(ovl_hdmi->info.enabled)
-		s3d_type_in_video_hdmi = ovl_hdmi->info.s3d_type;
 
 
 	hdmi = psSwapChain->stHdmiTiler.overlay;
@@ -871,6 +870,11 @@ static void OMAPLFBFliepNoLock_HDMI(OMAPLFB_SWAPCHAIN *psSwapChain,
 	if ( manager==NULL )
 		return;
 	hdmi->get_overlay_info(hdmi, &info);
+
+	//HDMI video layer enabled && not write back && HDMI manager
+	ovl_hdmi = omap_dss_get_overlay(3);
+	if(ovl_hdmi->info.enabled && !ovl_hdmi->info.out_wb && ovl_hdmi->manager==manager )
+		s3d_type_in_video_hdmi = ovl_hdmi->info.s3d_type;
 
 	//not good...
 	if ( omap_overlay_info_req[hdmi->id].status==2 )
@@ -892,14 +896,12 @@ static void OMAPLFBFliepNoLock_HDMI(OMAPLFB_SWAPCHAIN *psSwapChain,
 
 	if ( info.enabled )
 	{
+		mutex_lock(&psSwapChain->stHdmiTiler.lock);
 		if ( !psSwapChain->stHdmiTiler.alloc )
 		{
-			if ( AllocTilerForHdmi(psSwapChain, psDevInfo) ) {
-
-				ERROR_PRINTK("Alloc tiler memory for HDMI GUI cloning failed\n");
-				printk("DOLCOM : return tiler alloc\n");
-				return;
-			}
+			ERROR_PRINTK("Tiler memory for HDMI GUI cloning is not allocated\n");
+			mutex_unlock(&psSwapChain->stHdmiTiler.lock);
+			return;
 		}
 
 		if ( psSwapChain->stHdmiTiler.alloc )	//if Tiler memory is allocated
@@ -989,6 +991,7 @@ static void OMAPLFBFliepNoLock_HDMI(OMAPLFB_SWAPCHAIN *psSwapChain,
 				hdmi_video_commit_change(psSwapChain);
 			}
 		} //end of copy & set
+		mutex_unlock(&psSwapChain->stHdmiTiler.lock);
 	} //overlay enabled
 	else
 	{

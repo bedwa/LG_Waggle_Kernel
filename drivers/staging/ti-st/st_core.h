@@ -63,6 +63,8 @@ struct st_data_s {
  * lock
  */
 	spinlock_t lock;	/* ST LL state lock  */
+	spinlock_t register_lock;//hsyoon 20110616
+
 	unsigned long rx_state;
 	unsigned long rx_count;
 	struct sk_buff *rx_skb;
@@ -84,7 +86,7 @@ long st_write(struct sk_buff *);
  * It returns number of free space available in
  * uart tx buffer.
  */
-int st_get_uart_wr_room();
+int st_get_uart_wr_room(void);
 /*[Soldel] - Faster Initscript download time - END*/
 
 

@@ -23,10 +23,12 @@
 #include <linux/module.h>
 #include <linux/err.h>
 #include <linux/delay.h>
+#include <linux/io.h>
 
 #include <plat/opp.h>
 #include <plat/clock.h>
 #include <plat/omap_device.h>
+#include <plat/control.h>
 
 #include "cm-regbits-34xx.h"
 #include "prm.h"
@@ -44,6 +46,7 @@ static struct clk *abe_clk, *sgx_clk, *fdif_clk, *hsi_clk;
 
 /* LGE_CHANGE_S [kundong.kim@lge.com] 2011-03-06, boot m3 with max clock */
 static bool bootup_m3_with_maxclcok =1;
+#define JET_FREQ 1200000000
 /* LGE_CHANGE_E [kundong.kim@lge.com] 2011-03-06, boot m3 with max clock */
 /*
  * Separate OPP table is needed for pre ES2.1 chips as emif cannot be scaled.
@@ -59,6 +62,8 @@ static struct omap_opp_def __initdata omap44xx_pre_es2_1_opp_def_list[] = {
 	OMAP_OPP_DEF("mpu", true, 800000000, 1260000),
 	/* MPU OPP4 - OPP-SB */
 	OMAP_OPP_DEF("mpu", true, 1008000000, 1350000),
+	/* MPU OPP5 - OPP-JET */
+	OMAP_OPP_DEF("mpu", true, JET_FREQ, 1375000),
 	/* IVA OPP1 - OPP50_98 */
 	OMAP_OPP_DEF("iva", true,  133000000, 928000),
 	/* IVA OPP1 - OPP50 */
@@ -112,6 +117,8 @@ static struct omap_opp_def __initdata omap44xx_opp_def_list[] = {
 	OMAP_OPP_DEF("mpu", true, 800000000, 1260000),
 	/* MPU OPP4 - OPP-SB */
 	OMAP_OPP_DEF("mpu", true, 1008000000, 1350000),
+	/* MPU OPP5 - OPP-JET */
+	OMAP_OPP_DEF("mpu", true, 1200000000, 1375000),
 	/* IVA OPP1 - OPP50_98 */
 	OMAP_OPP_DEF("iva", true,  133000000, 928000),
 	/* IVA OPP1 - OPP50 */
@@ -137,27 +144,27 @@ static struct omap_opp_def __initdata omap44xx_opp_def_list[] = {
 	/* ABE OPP3 - OPPTB */
 	OMAP_OPP_DEF("omap-aess-audio", false, 196600000, 1260000),
 	/* L3 OPP1 - OPP50 */
-	OMAP_OPP_DEF("l3_main_1", true, 100000000, 930000),
+	OMAP_OPP_DEF("l3_main_1", true, 100000000, 950000),
 	/* L3 OPP2 - OPP100, OPP-Turbo, OPP-SB */
 	OMAP_OPP_DEF("l3_main_1", true, 200000000, 1100000),
 	/*EMIF1 OPP1 - OPP50 */
-	OMAP_OPP_DEF("emif1", true, 400000000, 930000),
+	OMAP_OPP_DEF("emif1", true, 400000000, 950000),
 	/*EMIF1 OPP2 - OPP100 */
 	OMAP_OPP_DEF("emif1", true, 800000000, 1100000),
 	/*EMIF2 OPP1 - OPP50 */
-	OMAP_OPP_DEF("emif2", true, 400000000, 930000),
+	OMAP_OPP_DEF("emif2", true, 400000000, 950000),
 	/*EMIF2 OPP2 - OPP100 */
 	OMAP_OPP_DEF("emif2", true, 800000000, 1100000),
 	/* CAM FDIF OPP1 - OPP50 */
-	OMAP_OPP_DEF("fdif", true, 64000000, 930000),
+	OMAP_OPP_DEF("fdif", true, 64000000, 950000),
 	/* CAM FDIF OPP2 - OPP100 */
 	OMAP_OPP_DEF("fdif", true, 128000000, 1100000),
 	/* SGX OPP1 - OPP50 */
-	OMAP_OPP_DEF("gpu", true, 153600000, 930000),
+	OMAP_OPP_DEF("gpu", true, 153600000, 950000),
 	/* SGX OPP2 - OPP100 */
 	OMAP_OPP_DEF("gpu", true, 307200000, 1100000),
 	/* HSI OPP1 - OPP50 */
-	OMAP_OPP_DEF("hsi", true, 96000000, 930000),
+	OMAP_OPP_DEF("hsi", true, 96000000, 950000),
 	/* HSI OPP2 - OPP100 */
 	// TI_CHANGE [MIPI-HSI] jaesung.woo@lge.com [START]
 	OMAP_OPP_DEF("hsi", true, 96000000, 1100000),
@@ -490,9 +497,11 @@ static u8 __initdata omap4_table_init;
 int __init omap4_pm_init_opp_table(void)
 {
 	struct omap_opp_def *opp_def;
+	struct omap_opp *jet_opp;
 	struct device *dev;
 	struct clk *gpu_fclk;
 	int i, r;
+	int has_jet_opp = 0;
 
 	/*
 	 * Allow multiple calls, but initialize only if not already initalized
@@ -540,6 +549,22 @@ int __init omap4_pm_init_opp_table(void)
 	if (dev)
 		opp_populate_rate_fns(dev, omap4_mpu_set_rate,
 				omap4_mpu_get_rate);
+
+  /* Enable 1.2Gz OPP for silicon that supports it
+   * TODO: determine if FUSE_OPP_VDD_MPU_3 is a reliable source to
+   * determine 1.2Gz availability.
+   */
+  has_jet_opp = __raw_readl(OMAP2_L4_IO_ADDRESS(CTRL_FUSE_OPP_VDD_MPU_3));
+  has_jet_opp &= 0xFFFFFF;
+
+  if (has_jet_opp) {
+    jet_opp = opp_find_freq_exact(dev, JET_FREQ, false);
+    if (IS_ERR(jet_opp))
+      pr_err("unable to find OPP for 1.2Gz\n");
+    else
+      opp_enable(jet_opp);
+  }
+
 
 	dev = omap2_get_iva_device();
 	if (dev)

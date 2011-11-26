@@ -37,6 +37,10 @@
 #include <linux/notifier.h>
 
 static uint32_t lowmem_debug_level = 2;
+
+// Dynamic threshold for Low Memory Killer to kill Secondary Server earlier [LGE_DOMESTIC]
+static uint32_t lowmem_is_running_3d_game = 0;
+
 static int lowmem_adj[6] = {
 	0,
 	1,
@@ -50,7 +54,19 @@ static size_t lowmem_minfree[6] = {
 	4 * 1024,	/* 16MB */
 	16 * 1024,	/* 64MB */
 };
+
+// Dynamic threshold for Low Memory Killer to kill Secondary Server earlier [LGE_DOMESTIC]
+static uint32_t lowmem_3d_game_minfree[6] = {
+	3 * 512,	/* 6MB */
+	2 * 1024,	/* 8MB */
+	4 * 1024,	/* 16MB */
+	16 * 1024,	/* 64MB */
+};
+
 static int lowmem_minfree_size = 4;
+
+// Dynamic threshold for Low Memory Killer to kill Secondary Server earlier [LGE_DOMESTIC]
+static int lowmem_3d_game_minfree_size = 4;
 
 static struct task_struct *lowmem_deathpending;
 static unsigned long lowmem_deathpending_timeout;
@@ -109,13 +125,29 @@ static int lowmem_shrink(struct shrinker *s, int nr_to_scan, gfp_t gfp_mask)
 		array_size = lowmem_adj_size;
 	if (lowmem_minfree_size < array_size)
 		array_size = lowmem_minfree_size;
-	for (i = 0; i < array_size; i++) {
-		if (other_free < lowmem_minfree[i] &&
-		    other_file < lowmem_minfree[i]) {
-			min_adj = lowmem_adj[i];
-			break;
-		}
-	}
+
+    // Dynamic threshold for Low Memory Killer to kill Secondary Server earlier [LGE_DOMESTIC]
+    if(lowmem_is_running_3d_game == 0)
+    {
+    	for (i = 0; i < array_size; i++) {
+    		if (other_free < lowmem_minfree[i] &&
+    		    other_file < lowmem_minfree[i]) {
+    			min_adj = lowmem_adj[i];
+    			break;
+    		}
+    	}
+    }
+    else
+    {
+    	for (i = 0; i < array_size; i++) {
+    		if (other_free < lowmem_3d_game_minfree[i] &&
+    		    other_file < lowmem_3d_game_minfree[i]) {
+    			min_adj = lowmem_adj[i];
+    			break;
+    		}
+    	}
+    }
+    
 	if (nr_to_scan > 0)
 		lowmem_print(3, "lowmem_shrink %d, %x, ofree %d %d, ma %d\n",
 			     nr_to_scan, gfp_mask, other_free, other_file,
@@ -205,6 +237,11 @@ module_param_array_named(adj, lowmem_adj, int, &lowmem_adj_size,
 module_param_array_named(minfree, lowmem_minfree, uint, &lowmem_minfree_size,
 			 S_IRUGO | S_IWUSR);
 module_param_named(debug_level, lowmem_debug_level, uint, S_IRUGO | S_IWUSR);
+
+// Dynamic threshold for Low Memory Killer to kill Secondary Server earlier [LGE_DOMESTIC]
+module_param_array_named(3d_game_minfree, lowmem_3d_game_minfree, uint, &lowmem_3d_game_minfree_size,
+			 S_IRUGO | S_IWUSR);
+module_param_named(is_running_3d_game, lowmem_is_running_3d_game, uint, S_IRUGO | S_IWUSR);
 
 module_init(lowmem_init);
 module_exit(lowmem_exit);

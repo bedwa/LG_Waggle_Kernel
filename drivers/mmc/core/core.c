@@ -66,6 +66,10 @@ MODULE_PARM_DESC(
 	removable,
 	"MMC/SD cards are removable and may be removed during suspend");
 
+#ifdef CONFIG_MACH_LGE_MMC_ALWAYSON
+struct mmc_ios ios_backup;
+#endif
+
 /*
  * Internal function. Schedule delayed work in the MMC work queue.
  */
@@ -83,7 +87,7 @@ static void mmc_flush_scheduled_work(void)
 {
 	flush_workqueue(workqueue);
 //LGE_CHANGE_S [kibum.lee@lge.com] 2011-04-10, common : wakelock time optimization
-	wake_unlock(&mmc_delayed_work_wake_lock);
+	//wake_unlock(&mmc_delayed_work_wake_lock);
 //LGE_CHANGE_E [kibum.lee@lge.com] 2011-04-10, common : wakelock time optimization
 }
 
@@ -1439,18 +1443,26 @@ int mmc_suspend_host(struct mmc_host *host)
 	cancel_delayed_work(&host->detect);
 	mmc_flush_scheduled_work();
 
-	if(strncmp(mmc_hostname(host),"mmc1",4))
-		{
-			mmc_bus_get(host);
-			if (host->bus_ops && !host->bus_dead) {
-				if (host->bus_ops->suspend)
-					err = host->bus_ops->suspend(host);
-			}
-			mmc_bus_put(host);
+	mmc_bus_get(host);
+	if (host->bus_ops && !host->bus_dead) {
+		if (host->bus_ops->suspend)
+			err = host->bus_ops->suspend(host);
+	}
+	mmc_bus_put(host);
+//LGE_CHANGE_S [kibum.lee@lge.com] 2011-04-10, common : wakelock time optimization
+	//mmc_flush_scheduled_work();
+//LGE_CHANGE_E [kibum.lee@lge.com] 2011-04-10, common : wakelock time optimization
+
+	if(!strncmp(mmc_hostname(host),"mmc1",4))
+	{
+		memcpy(&ios_backup,&host->ios,sizeof(struct mmc_ios));
+		printk("\n(IOS backup)\n%s: clock %uHz busmode %u powermode %u cs %u Vdd %u width %u timing %u\n",mmc_hostname(host), ios_backup.clock, ios_backup.bus_mode,ios_backup.power_mode, ios_backup.chip_select, ios_backup.vdd,ios_backup.bus_width, ios_backup.timing);
+	}
 	
-			if (!err && !(host->pm_flags & MMC_PM_KEEP_POWER))
-				mmc_power_off(host);
-		}
+	{
+		if (!err && !(host->pm_flags & MMC_PM_KEEP_POWER))
+			mmc_power_off(host);
+	}
 
 	return err;
 }
@@ -1501,31 +1513,32 @@ int mmc_resume_host(struct mmc_host *host)
 		return 0;
 	}
 
-	if(strncmp(mmc_hostname(host),"mmc1",4))
+	if (host->bus_ops && !host->bus_dead) {
+		if (!(host->pm_flags & MMC_PM_KEEP_POWER)) 
 		{
-			if (host->bus_ops && !host->bus_dead) {
-				if (!(host->pm_flags & MMC_PM_KEEP_POWER)) {
-					mmc_power_up(host);
-					mmc_select_voltage(host, host->ocr);
-				}
-				BUG_ON(!host->bus_ops->resume);
-				err = host->bus_ops->resume(host);
-				if (err) {
-					printk(KERN_WARNING "%s: error %d during resume "
-							    "(card was removed?)\n",
-							    mmc_hostname(host), err);
-					err = 0;
-				}
-			}
+			mmc_power_up(host);
+			mmc_select_voltage(host, host->ocr);
 		}
+		
+		BUG_ON(!host->bus_ops->resume);
+		err = host->bus_ops->resume(host);
+		
+		if (err) {
+			printk(KERN_WARNING "%s: error %d during resume "
+					    "(card was removed?)\n",
+					    mmc_hostname(host), err);
+			err = 0;
+		}
+	}
+
+	if(!strncmp(mmc_hostname(host),"mmc1",4))
+	{
+		memcpy(&host->ios,&ios_backup,sizeof(struct mmc_ios));
+		mmc_set_ios(host);
+		printk("\n(IOS restore)\n%s: clock %uHz busmode %u powermode %u cs %u Vdd %u  width %u timing %u\n",mmc_hostname(host), ios_backup.clock, ios_backup.bus_mode,ios_backup.power_mode, ios_backup.chip_select, ios_backup.vdd,ios_backup.bus_width, ios_backup.timing);
+	}
 	
 	mmc_bus_put(host);
-
-	/*
-	 * We add a slight delay here so that resume can progress
-	 * in parallel.
-	 */
-	mmc_detect_change(host, 1);
 
 	return err;
 }

@@ -189,7 +189,7 @@ static int hci_st_close(struct hci_dev *hdev)
 	err = 0;
 
 	if (test_and_clear_bit(BT_ST_REGISTERED, &hst->flags)) {
-	
+		ST_LOG("[%s] befor calling hciif_dev_down() ###############\n", __func__);
 		err = hciif_dev_down(hst->client);
 		if(err)
 		{

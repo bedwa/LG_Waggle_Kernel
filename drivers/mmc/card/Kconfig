@@ -69,6 +69,14 @@ config MACH_LGE_VMMC_ALWAYSON_FORCED
 	  Say Y here to enable card always on.
 
 
+config MACH_LGE_VMMC_AUTO_OFF
+	bool "VMMC AUTO OFF"
+	depends on MMC_BLOCK
+	default n
+	help
+	  Say Y here to enable host auto off by sdcard exist or not.
+
+
 config MMC_BLOCK_DEFERRED_RESUME
 	bool "Deferr MMC layer resume until I/O is requested"
 	depends on MMC_BLOCK

@@ -73,6 +73,7 @@ typedef struct PVRPDP_SWAPCHAIN_TAG
 	void*                           pvDevInfo;
 	/* LGE_CHANGE_S [wonki.choi@lge.com] Overlay Refactoring 2011-1-24*/
 	struct {
+		struct mutex	lock;
 		u32				pAddr;				//physical address
 		unsigned long	pStride;			//physical st
 		void 			*vAddr;				//virtual address

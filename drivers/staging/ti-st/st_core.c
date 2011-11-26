@@ -27,6 +27,7 @@
 #include <net/bluetooth/bluetooth.h>
 #include <net/bluetooth/hci_core.h>
 #include <net/bluetooth/hci.h>
+#include <linux/rtc.h> 
 #include "fm.h"
 /*
  * packet formats for fm and gps
@@ -55,19 +56,23 @@
 #define ST_DRV_VER(fmt, arg...)
 #endif
 
-#if 1    /* TIK_BT OPP fail issue */
-static struct semaphore st_core_sem;
-static struct semaphore st_rcv_sem;//hsyoon
-static struct semaphore st_hcill_sem;//hsyoon
-#endif
 
 // LGE_LGE_WCDMA_FEATURE_MERGE  START
 #define TMP_ST_RECV_FIX
 // LGE_LGE_WCDMA_FEATURE_MERGE  END
+#if 1//TI HSYoon 20110616
+static unsigned long irq_save_flags;
+#endif
+
+#if 1//TI HSYoon 20110613
+struct st_data_s *st_gdata;//required for st_kim.c
+EXPORT_SYMBOL_GPL(st_gdata);
+#else
 /*
  * local data instances
  */
 static struct st_data_s *st_gdata;
+#endif
 /* function pointer pointing to either,
  * st_kim_recv during registration to receive fw download responses
  * st_int_recv after registration to receive proto stack responses
@@ -87,7 +92,11 @@ int st_get_uart_wr_room()
 {
 	struct tty_struct *tty;
 	if (unlikely(st_gdata == NULL || st_gdata->tty == NULL)) {
+#if 1//hsyoon 20110616
+		pr_err("[%s] tty unavailable to perform write %d %d", __func__, st_gdata, st_gdata->tty );    
+#else
 		pr_err("tty unavailable to perform write");
+#endif
 		return -1;
 	}
 	tty = st_gdata->tty;
@@ -152,25 +161,21 @@ static long remove_channel_from_table(channel_t channelid)
  */
 int st_int_write(const unsigned char *data, int count)
 {
-#ifdef VERBOSE			/* for debug */
-	int i;
+#if defined(SHOW_ST_LOG) //hsyoon 20110605 -remove log
+  printk("%s( %d )\n", __func__, count);
 #endif
 	struct tty_struct *tty;
 	if (unlikely(st_gdata == NULL || st_gdata->tty == NULL)) {
-		ST_DRV_ERR("tty unavailable to perform write");
+	ST_DRV_ERR("[%s] tty unavailable to perform write %d %d", __func__, st_gdata, st_gdata->tty );    
 		return ST_ERR_FAILURE;
 	}
 	tty = st_gdata->tty;
 	
-#ifdef VERBOSE
-	printk(KERN_ERR "start data.. \n");
-	for (i = 0; i < count; i++)	/* no newlines for each datum */
-		printk(" %x", data[i]);
-	printk(KERN_ERR "\n ..end data\n");
+#if defined(SHOW_ST_LOG)
+	printk("%s(%d) : %x %x %x %x %x %x %x\n", __func__, count, data[0],data[1],data[2],data[3],data[4],data[5],data[6]);
 #endif
 
 	return tty->ops->write(tty, data, count);
-
 }
 
 /*
@@ -269,11 +274,6 @@ static inline void st_wakeup_ack(unsigned char cmd)
 {
 	register struct sk_buff *waiting_skb;
 	unsigned long flags = 0;
-#if 1    /* TIK_BT OPP fail issue */
-	//down(&st_core_sem);
-#else
-	spin_lock_irqsave(&st_gdata->lock, flags);
-#endif
 	/* de-Q from waitQ and Q in txQ now that the
 	 * chip is awake
 	 */
@@ -282,11 +282,6 @@ static inline void st_wakeup_ack(unsigned char cmd)
 
 	/* state forwarded to ST LL */
 	st_ll_sleep_state((unsigned long)cmd);
-#if 1    /* TIK_BT OPP fail issue */
-	//up(&st_core_sem);
-#else
-	spin_unlock_irqrestore(&st_gdata->lock, flags);
-#endif
 
 	/* wake up to send the recently copied skbs from waitQ */
 	st_tx_wakeup(st_gdata);
@@ -316,18 +311,11 @@ void st_int_recv(const unsigned char *data, long count)
 	/* Decode received bytes here */
 	while (count) {
 		if (st_gdata->rx_count) {
-#if 1    /* TIK_BT OPP fail issue */
-			down(&st_rcv_sem);
-#endif	 
 			len = min_t(unsigned int, st_gdata->rx_count, count);
 			memcpy(skb_put(st_gdata->rx_skb, len), ptr, len);
 			st_gdata->rx_count -= len;
 			count -= len;
 			ptr += len;
-
-#if 1    /* TIK_BT OPP fail issue */
-			up(&st_rcv_sem);
-#endif	 
 
 			if (st_gdata->rx_count)
 				continue;
@@ -337,17 +325,11 @@ void st_int_recv(const unsigned char *data, long count)
 
 				case ST_W4_DATA:
 				{
-					ST_DRV_DBG("RX Pkt (data):Complete pkt received");
+					//ST_LOG_X("RX Pkt (data):Complete pkt received\n");//hsyoon 20110612
 
 				/* Ask ST CORE to forward
 				 * the packet to protocol driver */
-#if 1    /* TIK_BT OPP fail issue */
-					down(&st_rcv_sem);
-#endif	 				 
-					st_send_frame(st_gdata->channelid, st_gdata->rx_skb);
-#if 1    /* TIK_BT OPP fail issue */
-					up(&st_rcv_sem);
-#endif	 
+				st_send_frame(st_gdata->channelid, st_gdata->rx_skb);
 				st_gdata->rx_state = ST_W4_PACKET_TYPE;
 				st_gdata->rx_skb = NULL;
 					channelid = ST_MAX_CHANNELS;	/* is this required ? */
@@ -373,13 +355,7 @@ void st_int_recv(const unsigned char *data, long count)
 						return;
 					}
 					ST_DRV_DBG("RX Pkt (header): payload_len = %d", payload_len);
-#if 1    /* TIK_BT OPP fail issue */
-					down(&st_rcv_sem);
-#endif	 
 					st_check_data_len(channelid, payload_len);
-#if 1    /* TIK_BT OPP fail issue */
-					up(&st_rcv_sem);
-#endif	 		
 				continue;
 				}
 
@@ -392,12 +368,20 @@ void st_int_recv(const unsigned char *data, long count)
 		channelid = *ptr;
 		switch (channelid) {
 		case LL_SLEEP_IND:
-		case LL_SLEEP_ACK:	
+
+			printk("############HCILL : LL_SLEEP_IND\n");//hsyoon 20110612
+#if 1//hsyoon 20110612		
+			st_ll_sleep_state(channelid);
+			break;
+#endif
+		case LL_SLEEP_ACK:				
+			printk("############HCILL : LL_SLEEP_ACK\n");//hsyoon 20110612
 #if 1    /* TIK_BT OPP fail issue */			
 			st_ll_sleep_state(channelid);
 			break;
 #endif
 		case LL_WAKE_UP_IND:
+			printk("############HCILL : LL_WAKE_UP_IND\n");//hsyoon 20110612
 			{
 			/* this takes appropriate action based on
 			 * sleep state received --
@@ -410,6 +394,7 @@ void st_int_recv(const unsigned char *data, long count)
 				break;
 			}
 		case LL_WAKE_UP_ACK:
+			printk("############HCILL : LL_WAKE_UP_ACK\n");//hsyoon 20110612
 			{
 			/* wake up ack received */
 				st_wakeup_ack(channelid);		
@@ -417,27 +402,23 @@ void st_int_recv(const unsigned char *data, long count)
 			}
 			default: /* non-HCILL channels */
 			{	
+#if 1    /* Passat issue hsyoon 20110624 
+            We make HCILL awake when data packet is received in non-awake state
+         */			
+				if( st_ll_getstate() != ST_LL_AWAKE)
+                                {  
+				     printk("########################### Rcvd Channel ID: %d\n", channelid);
+				     st_wakeup_ack(LL_WAKE_UP_IND);
+			}
+#endif	
 				if(unlikely(channelid >= ST_MAX_CHANNELS || st_gdata->channels[channelid] == NULL))
 				{
-					ST_DRV_ERR("Unknown packet type %2.2x", (__u8) *ptr);
-			break;
+					ST_DRV_ERR("Unknown packet type. ch_id =%d, %2.2x", channelid, (__u8) *ptr);
+			    break;
 				}
 
 				/* bluez skb allocation reserves headroom which can be used by other client for pushing the channel num */
-#if 1    /* TIK_BT OPP fail issue */
-				down(&st_rcv_sem);
-#endif
-
-#if 1    /* TIK_BT OPP fail issue */
-				st_gdata->rx_skb = bt_skb_alloc(st_gdata->channels[channelid]->max_frame_size, GFP_KERNEL);
-#else
 				st_gdata->rx_skb = bt_skb_alloc(st_gdata->channels[channelid]->max_frame_size, GFP_ATOMIC);
-#endif
-
-#if 1    /* TIK_BT OPP fail issue */
-				up(&st_rcv_sem);
-#endif	 
-
 			if (!st_gdata->rx_skb) {
 					ST_DRV_ERR("RX Pkt (channelid=%d): Can't allocate mem for new packet", channelid);
 				st_gdata->rx_state = ST_W4_PACKET_TYPE;
@@ -494,11 +475,6 @@ void st_int_enqueue(struct sk_buff *skb)
 	ST_DRV_VER("%s", __func__);
 	/* this function can be invoked in more then one context.
 	 * so have a lock */
-#if 1    /* TIK_BT OPP fail issue */
-	down(&st_core_sem);
-#else	 
-	spin_lock_irqsave(&st_gdata->lock, flags);
-#endif
 
 	switch (st_ll_getstate()) {
 	case ST_LL_AWAKE:
@@ -528,11 +504,6 @@ void st_int_enqueue(struct sk_buff *skb)
 		break;
 	}
 
-#if 1    /* TIK_BT OPP fail issue */
-	up(&st_core_sem);
-#else	
-	spin_unlock_irqrestore(&st_gdata->lock, flags);
-#endif
 	ST_DRV_VER("done %s", __func__);
 	return;
 }
@@ -563,11 +534,6 @@ void st_tx_wakeup(struct st_data_s *st_data)
 		clear_bit(ST_TX_WAKEUP, &st_data->tx_state);
 		while ((skb = st_int_dequeue(st_data))) {
 			int len;
-#if 1    /* TIK_BT OPP fail issue */
-	//down(&st_core_sem);
-#else			
-			spin_lock_irqsave(&st_data->lock, flags);
-#endif
 			/* enable wake-up from TTY */
 			set_bit(TTY_DO_WRITE_WAKEUP, &st_data->tty->flags);
 			len = st_int_write(skb->data, skb->len);
@@ -576,19 +542,9 @@ void st_tx_wakeup(struct st_data_s *st_data)
 			if (skb->len) {
 				/* would be the next skb to be sent */
 				st_data->tx_skb = skb;
-#if 1    /* TIK_BT OPP fail issue */
-	//up(&st_core_sem);
-#else				
-				spin_unlock_irqrestore(&st_gdata->lock, flags);
-#endif
 				break;
 			}
 			kfree_skb(skb);
-#if 1    /* TIK_BT OPP fail issue */
-	//up(&st_core_sem);
-#else			
-			spin_unlock_irqrestore(&st_gdata->lock, flags);
-#endif
 		}
 		/* if wake-up is set in another context- restart sending */
 	} while (test_bit(ST_TX_WAKEUP, &st_data->tx_state));
@@ -606,11 +562,7 @@ void kim_st_list_channels(char *buf)
 #ifdef DEBUG
 	unsigned char i = ST_MAX_CHANNELS;
 #endif
-#if 1    /* TIK_BT OPP fail issue */
-	down(&st_core_sem);
-#else
-	spin_lock_irqsave(&st_gdata->lock, flags);
-#endif
+	spin_lock_irqsave(&st_gdata->lock, irq_save_flags);//TI HSYoon 20110616
 #ifdef DEBUG			/* more detailed log */
 	for (i = 0; i < ST_MAX_CHANNELS; i++) {
 		if (i == 0) {
@@ -630,11 +582,7 @@ void kim_st_list_channels(char *buf)
 		st_gdata->channels[8] != NULL ? 'R' : 'U',
 		st_gdata->channels[9] != NULL ? 'R' : 'U');
 #endif
-#if 1    /* TIK_BT OPP fail issue */
-	up(&st_core_sem);
-#else
-	spin_unlock_irqrestore(&st_gdata->lock, flags);
-#endif
+	spin_unlock_irqrestore(&st_gdata->lock, irq_save_flags);//TI HSYoon 20110616
 }
 
 /********************************************************************/
@@ -647,7 +595,9 @@ long st_register(struct st_proto_s *new_proto)
 	long err = ST_SUCCESS;
 	unsigned long flags = 0;
 
-	ST_DRV_DBG("%s(%d) ", __func__, new_proto->channelid);
+  ST_LOG("***************************************\n");
+  
+	ST_DRV_ERR("%s(%d) ", __func__, new_proto->channelid);
 	if (st_gdata == NULL || new_proto == NULL || new_proto->recv == NULL
 	    || new_proto->reg_complete_cb == NULL) {
 		ST_DRV_ERR("gdata/new_proto/recv or reg_complete_cb not ready");
@@ -665,14 +615,10 @@ long st_register(struct st_proto_s *new_proto)
 	}
 
 	/* can be from process context only */
-#if 1    /* TIK_BT OPP fail issue */
-	down(&st_core_sem);
-#else
-	spin_lock_irqsave(&st_gdata->lock, flags);
-#endif
+	spin_lock_irqsave(&st_gdata->lock, irq_save_flags);//TI HSYoon 20110616
 
 	if (test_bit(ST_REG_IN_PROGRESS, &st_gdata->st_state)) {
-		ST_DRV_DBG(" ST_REG_IN_PROGRESS:%d ", new_proto->channelid);
+		ST_DRV_ERR(" ST_REG_IN_PROGRESS:%d ", new_proto->channelid);
 		/* fw download in progress */
 
 		if(new_proto->gpio_id != ST_GPIO_MAX)
@@ -681,38 +627,31 @@ long st_register(struct st_proto_s *new_proto)
 		err = add_channel_to_table(new_proto);
 		if(err)
 		{
-#if 1    /* TIK_BT OPP fail issue */
-	up(&st_core_sem);
-#else		
-			spin_unlock_irqrestore(&st_gdata->lock, flags);
-#endif
+			spin_unlock_irqrestore(&st_gdata->lock, irq_save_flags);//TI HSYoon 20110616
 			return err;
 		}
 		set_bit(ST_REG_PENDING, &st_gdata->st_state);
-#if 1    /* TIK_BT OPP fail issue */
-	up(&st_core_sem);
-#else		
-		spin_unlock_irqrestore(&st_gdata->lock, flags);
-#endif
+			spin_unlock_irqrestore(&st_gdata->lock, irq_save_flags);//TI HSYoon 20110616
 		return ST_ERR_PENDING;
-	} else if (is_channels_table_empty()) {
-		ST_DRV_DBG(" protocol list empty :%d ", new_proto->channelid);
+		} else if (is_channels_table_empty()) {
+
+		ST_DRV_ERR(" protocol list empty :%d ", new_proto->channelid);
 		set_bit(ST_REG_IN_PROGRESS, &st_gdata->st_state);
 		st_recv = st_kim_recv;
 
 		/* release lock previously held - re-locked below */
-#if 1    /* TIK_BT OPP fail issue */
-	up(&st_core_sem);
-#else
-		spin_unlock_irqrestore(&st_gdata->lock, flags);
-#endif
 
 		/* enable the ST LL - to set default chip state */
 		st_ll_enable();
 		/* this may take a while to complete
 		 * since it involves BT fw download
 		 */
+#if 1//hsyoon 20110616
+		spin_unlock_irqrestore(&st_gdata->lock, irq_save_flags);//TI HSYoon 20110616
+#endif
+
 		err = st_kim_start();
+		
 		if (err != ST_SUCCESS) {
 			clear_bit(ST_REG_IN_PROGRESS, &st_gdata->st_state);
 			if ((!is_channels_table_empty()) &&
@@ -720,39 +659,44 @@ long st_register(struct st_proto_s *new_proto)
 				ST_DRV_ERR(" KIM failure complete callback ");
 				st_reg_complete(ST_ERR_FAILURE);
 			}
-
+			
 			return ST_ERR_FAILURE;
 		}
+		ST_DRV_ERR(" KIM complete callback gpio_id : %d, channelid : %d",new_proto->gpio_id,new_proto->channelid );
 
 		/* the protocol might require other gpios to be toggled
 		 */
+		 
 		if(new_proto->gpio_id != ST_GPIO_MAX)
 			st_kim_chip_toggle(new_proto->gpio_id, KIM_GPIO_ACTIVE);
 
+#if 1//hsyoon 20110616
+		spin_lock_irqsave(&st_gdata->lock, irq_save_flags);//TI HSYoon 20110616
+#endif
+
 		clear_bit(ST_REG_IN_PROGRESS, &st_gdata->st_state);
 		st_recv = st_int_recv;
+    
+#if 1//hsyoon 20110616
+		spin_unlock_irqrestore(&st_gdata->lock, irq_save_flags);//TI HSYoon 20110616
+#endif
 
 		/* this is where all pending registration
 		 * are signalled to be complete by calling callback functions
 		 */
 		if ((!is_channels_table_empty()) &&
 		    (test_bit(ST_REG_PENDING, &st_gdata->st_state))) {
-			ST_DRV_VER(" call reg complete callback ");
+			ST_DRV_ERR(" call reg complete callback ");
 			st_reg_complete(ST_SUCCESS);
 		}
 		clear_bit(ST_REG_PENDING, &st_gdata->st_state);
 
-#if 1    /* TIK_BT OPP fail issue */
-	down(&st_core_sem);
-#else
-		spin_lock_irqsave(&st_gdata->lock, flags);
+#if 1//hsyoon 20110616
+		spin_lock_irqsave(&st_gdata->lock, irq_save_flags);//TI HSYoon 20110616
 #endif
+
 		err = add_channel_to_table(new_proto);
-#if 1    /* TIK_BT OPP fail issue */
-	up(&st_core_sem);
-#else
-		spin_unlock_irqrestore(&st_gdata->lock, flags);
-#endif
+			spin_unlock_irqrestore(&st_gdata->lock, irq_save_flags);//TI HSYoon 20110616
 
 		return err;
 	}
@@ -763,14 +707,10 @@ long st_register(struct st_proto_s *new_proto)
 		err = add_channel_to_table(new_proto);
 
 		/* lock already held before entering else */
-#if 1    /* TIK_BT OPP fail issue */
-	up(&st_core_sem);
-#else
-		spin_unlock_irqrestore(&st_gdata->lock, flags);
-#endif
+			spin_unlock_irqrestore(&st_gdata->lock, irq_save_flags);//TI HSYoon 20110616
 		return err;
 	}
-	ST_DRV_DBG("done %s(%d) ", __func__, new_proto->channelid);
+	ST_DRV_ERR("done %s(%d) ", __func__, new_proto->channelid);
 }
 EXPORT_SYMBOL_GPL(st_register);
 
@@ -782,18 +722,14 @@ long st_unregister(channel_t channelid)
 	long err = ST_SUCCESS;
 	unsigned long flags = 0;
 
-	ST_DRV_DBG("%s: %d ", __func__, channelid);
+	ST_DRV_ERR("%s: %d ", __func__, channelid);
 
 	if (channelid >= ST_MAX_CHANNELS) {
 		ST_DRV_ERR(" protocol %d not supported", channelid);
 		return ST_ERR_NOPROTO;
 	}
 
-#if 1    /* TIK_BT OPP fail issue */
-	down(&st_core_sem);
-#else
-	spin_lock_irqsave(&st_gdata->lock, flags);
-#endif
+			spin_lock_irqsave(&st_gdata->lock, irq_save_flags);//TI HSYoon 20110616
 
 	/* kim ignores BT in the below function
 	 * and handles the rest, BT is toggled
@@ -804,15 +740,14 @@ long st_unregister(channel_t channelid)
 		st_kim_chip_toggle(st_gdata->channels[channelid]->gpio_id, KIM_GPIO_INACTIVE);
 	}
 	remove_channel_from_table(channelid);
-#if 1    /* TIK_BT OPP fail issue */
-	up(&st_core_sem);
-#else
-	spin_unlock_irqrestore(&st_gdata->lock, flags);
-#endif
+
+			spin_unlock_irqrestore(&st_gdata->lock, irq_save_flags);//TI HSYoon 20110616
+
 
 	if ((is_channels_table_empty()) &&
-	    (!test_bit(ST_REG_PENDING, &st_gdata->st_state))) {
-		ST_DRV_DBG(" all protocols unregistered ");
+		(!test_bit(ST_REG_PENDING, &st_gdata->st_state))) 
+        {
+		ST_DRV_ERR(" all protocols unregistered ");
 
 		/* stop traffic on tty */
 		if (st_gdata->tty) {
@@ -826,7 +761,7 @@ long st_unregister(channel_t channelid)
 		st_ll_disable();
 	}
 	else
-	{
+	{	
 		switch(channelid) /* TBD - remove this (should be done by GPS_DRV) */
 		{
 			case 0x9: 
@@ -861,9 +796,12 @@ long st_write(struct sk_buff *skb)
 	long len;
 	struct st_data_s *st_data = st_gdata;
 
+	spin_lock(&st_gdata->lock);//TI HSYoon 20110613
+
 	if (unlikely(skb == NULL || st_gdata == NULL
 		|| st_gdata->tty == NULL)) {
 		ST_DRV_ERR("data/tty unavailable to perform write");
+		spin_unlock(&st_gdata->lock);//TI HSYoon 20110613
 		return ST_ERR_FAILURE;
 	}
 #ifdef DEBUG			/* open-up skb to read the 1st byte */
@@ -871,6 +809,7 @@ long st_write(struct sk_buff *skb)
 	if (unlikely(( channelid != 1) && (channelid >= ST_MAX_CHANNELS || st_gdata->channels[channelid] == NULL))) {
 		ST_DRV_ERR(" channelid %d not registered, and writing? ",
 			   channelid);
+		spin_unlock(&st_gdata->lock);//TI HSYoon 20110613
 		return ST_ERR_FAILURE;
 	}
 #endif
@@ -881,6 +820,8 @@ long st_write(struct sk_buff *skb)
 	st_int_enqueue(skb);
 	/* wake up */
 	st_tx_wakeup(st_data);
+
+	spin_unlock(&st_gdata->lock);//TI HSYoon 20110613
 
 	/* return number of bytes written */
 	return len;
@@ -896,6 +837,8 @@ static int st_tty_open(struct tty_struct *tty)
 {
 	int err = ST_SUCCESS;
 	ST_DRV_DBG("%s ", __func__);
+
+  ST_LOG("st_tty_open enter....................\n");
 
 	st_gdata->tty = tty;
 
@@ -923,26 +866,20 @@ static void st_tty_close(struct tty_struct *tty)
 	unsigned long flags = 0;
 
 	ST_DRV_DBG("%s ", __func__);
+  ST_LOG("st_tty_close enter....................\n");
+
 
 	/* TODO:
 	 * if a channel has been registered & line discipline
 	 * un-installed for some reason - what should be done ?
 	 */
-#if 1    /* TIK_BT OPP fail issue */
-	down(&st_core_sem);
-#else
-	spin_lock_irqsave(&st_gdata->lock, flags);
-#endif
+	spin_lock_irqsave(&st_gdata->lock, irq_save_flags);//TI HSYoon 20110613
 	for (i = 0; i < ST_MAX_CHANNELS; i++) {
 		if (st_gdata->channels[i] != NULL)
 			ST_DRV_ERR("%d not un-registered", i);
 		st_gdata->channels[i] = NULL;
 	}
-#if 1    /* TIK_BT OPP fail issue */
-	up(&st_core_sem);
-#else
-	spin_unlock_irqrestore(&st_gdata->lock, flags);
-#endif
+	spin_unlock_irqrestore(&st_gdata->lock, irq_save_flags);//TI HSYoon 20110613
 	/*
 	 * signal to UIM via KIM that -
 	 * N_TI_WL ldisc is un-installed
@@ -953,11 +890,7 @@ static void st_tty_close(struct tty_struct *tty)
 	tty_ldisc_flush(tty);
 	tty_driver_flush_buffer(tty);
 
-#if 1    /* TIK_BT OPP fail issue */
-	down(&st_core_sem);
-#else
-	spin_lock_irqsave(&st_gdata->lock, flags);
-#endif
+	spin_lock_irqsave(&st_gdata->lock, irq_save_flags);//TI HSYoon 20110613
 	/* empty out txq and tx_waitq */
 	skb_queue_purge(&st_gdata->txq);
 	skb_queue_purge(&st_gdata->tx_waitq);
@@ -966,23 +899,23 @@ static void st_tty_close(struct tty_struct *tty)
 	st_gdata->rx_state = ST_W4_PACKET_TYPE;
 	kfree_skb(st_gdata->rx_skb);
 	st_gdata->rx_skb = NULL;
-#if 1    /* TIK_BT OPP fail issue */
-	up(&st_core_sem);
-#else
-	spin_unlock_irqrestore(&st_gdata->lock, flags);
-#endif
+	spin_unlock_irqrestore(&st_gdata->lock, irq_save_flags);//TI HSYoon 20110613
+
 	ST_DRV_DBG("%s: done ", __func__);
 }
 
 static void st_tty_receive(struct tty_struct *tty, const unsigned char *data,
 			   char *tty_flags, int count)
 {
-#ifdef VERBOSE
-	long i;
-	printk(KERN_ERR "incoming data...\n");
-	for (i = 0; i < count; i++)
-		printk(" %x", data[i]);
-	printk(KERN_ERR "\n.. data end\n");
+#if defined(SHOW_ST_LOG)//VERBOSE
+	printk("%s(%d) : %x %x %x %x %x %x %x %x %x\n", __func__, count, data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8]);
+#endif
+
+#if 1 /* Introducing delay for stability of FM on and OPP 20110630 */
+	if( data[0] == 0x8 ) //FM
+	     mdelay(5);
+	else	//BT
+              mdelay(1);
 #endif
 
 	/*
@@ -994,19 +927,21 @@ static void st_tty_receive(struct tty_struct *tty, const unsigned char *data,
 #ifdef TMP_ST_RECV_FIX // Temporary changes to fix kernel panic during MO
      if(st_recv == NULL)
      {
-        printk("st_recv == NULL\n");
+        ST_LOG("st_recv == NULL\n");
         return;
      }
 #endif //TMP_ST_RECV_FIX
 // LGE_LGE_WCDMA_FEATURE_MERGE  END
 #if 1    /* TIK_BT OPP fail issue */
-        tty_throttle(tty);
+        //tty_throttle(tty);
+        //spin_lock_irqsave(&st_gdata->lock, irq_save_flags); //TI HSYoon 20110616
         spin_lock(&st_gdata->lock);
 #endif
 		st_recv(data, count);
 #if 1    /* TIK_BT OPP fail issue */
         spin_unlock(&st_gdata->lock);
-        tty_unthrottle(tty);
+        //spin_unlock_irqrestore(&st_gdata->lock, irq_save_flags); //TI HSYoon 20110616
+        //tty_unthrottle(tty);
 #endif
 
 	//msleep(1);
@@ -1042,12 +977,6 @@ static int __init st_core_init(void)
 {
 	long err;
 	static struct tty_ldisc_ops *st_ldisc_ops;
-
-#if 1    /* TIK_BT OPP fail issue */
-	init_MUTEX(&st_core_sem);
-	init_MUTEX(&st_rcv_sem);
-#endif 
-
 
 	/* populate and register to TTY line discipline */
 	st_ldisc_ops = kzalloc(sizeof(*st_ldisc_ops), GFP_KERNEL);
@@ -1093,6 +1022,8 @@ static int __init st_core_init(void)
 
 	/* Locking used in st_int_enqueue() to avoid multiple execution */
 	spin_lock_init(&st_gdata->lock);
+	//spin_lock_init(&st_gdata->register_lock);//hsyoon 20110616
+  
 
 	/* ldisc_ops ref to be only used in __exit of module */
 	st_gdata->ldisc_ops = st_ldisc_ops;

@@ -385,101 +385,6 @@ static irqreturn_t prcm_interrupt_handler (int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
-/* LGE_CHANGE_S [hyunhee.jeon@lge.com] 2011-01-31, gpio resetting to remove IO lekeage */
-static omap4_mux_nc_setting(void)
-{
-	omap_writew(0x0108, 0x4a100050);
-	omap_writew(0x0108, 0x4a100052);
-	omap_writew(0x0108, 0x4a100054);
-	omap_writew(0x0108, 0x4a100056);
-	omap_writew(0x0108, 0x4a100058);
-	omap_writew(0x0108, 0x4a10005a);
-	omap_writew(0x0108, 0x4a10005c);
-	omap_writew(0x0108, 0x4a10005e);
-
-	omap_writew(0x010f, 0x4a100068);
-	omap_writew(0x010f, 0x4a10006a);
-	omap_writew(0x010f, 0x4a10006c);
-	omap_writew(0x010f, 0x4a10006e);
-	omap_writew(0x010f, 0x4a100070);
-	omap_writew(0x010f, 0x4a100072);
-	omap_writew(0x0000, 0x4a100074);
-
-	omap_writew(0x010f, 0x4a10007a);
-	omap_writew(0x010f, 0x4a10007c);
-
-	omap_writew(0x0000, 0x4a100080);
-
-	omap_writew(0x0000, 0x4a100086);
-
-	omap_writew(0x0108, 0x4a10008a);
-	omap_writew(0x010f, 0x4a10008c);
-	omap_writew(0x010f, 0x4a10008e);
-	omap_writew(0x010f, 0x4a100090);
-	omap_writew(0x010f, 0x4a100092);
-	omap_writew(0x010f, 0x4a100094);
-
-	omap_writew(0x010f, 0x4a1000bc);
-
-	/* connected with infenion, but not used. */
-#if 0
-	omap_writew(0x010f, 0x4a1000c2);
-	omap_writew(0x010f, 0x4a1000c4);
-	omap_writew(0x010f, 0x4a1000c6);
-	omap_writew(0x010f, 0x4a1000c8);
-	omap_writew(0x010f, 0x4a1000ca);
-	omap_writew(0x010f, 0x4a1000cc);
-	omap_writew(0x010f, 0x4a1000ce);
-	omap_writew(0x010f, 0x4a1000d0);
-#endif
-	omap_writew(0x010f, 0x4a31e048);
-
-	omap_writew(0x010f, 0x4a1000ee);
-	omap_writew(0x010f, 0x4a1000f0);
-	omap_writew(0x010f, 0x4a1000f2);
-	omap_writew(0x010f, 0x4a1000f4);
-
-	omap_writew(0x010f, 0x4a10013c);
-	omap_writew(0x010f, 0x4a100142);
-
-	omap_writew(0x010f, 0x4a10015a);
-	omap_writew(0x010f, 0x4a100160);
-	omap_writew(0x010f, 0x4a100162);
-	omap_writew(0x010f, 0x4a100164);
-	omap_writew(0x010f, 0x4a100166);
-	omap_writew(0x010f, 0x4a100168);
-	omap_writew(0x010f, 0x4a10016a);
-	omap_writew(0x010f, 0x4a10016c);
-
-	omap_writew(0x010f, 0x4a100178);
-	omap_writew(0x010f, 0x4a10017a);
-
-	omap_writew(0x010f, 0x4a100180);
-	omap_writew(0x010f, 0x4a100182);
-
-	omap_writew(0x010f, 0x4a10018c);
-	omap_writew(0x010f, 0x4a10018e);
-	omap_writew(0x010f, 0x4a100190);
-	omap_writew(0x010f, 0x4a100192);
-
-	omap_writew(0x010f, 0x4a10019c);
-
-	omap_writew(0x0000, 0x4a31e05C);
-
-	omap_writew(0x010f, 0x4a1001a2);
-
-	omap_writew(0x010f, 0x4a1001a8);
-
-	omap_writew(0x010f, 0x4a1001ac);
-
-	omap_writew(0x010f, 0x4a1001b2);
-
-	omap_writew(0x010f, 0x4a1001c2);
-
-}
-
-/* LGE_CHANGE_E [hyunhee.jeon@lge.com] */
-
 #ifdef CONFIG_SUSPEND
 extern int twl_i2c_write_u8(unsigned char mod_no, unsigned char value, unsigned char reg);
 static int omap4_pm_prepare(void)
@@ -501,12 +406,18 @@ static int omap4_pm_prepare(void)
 	twl_i2c_write_u8(0x0D, 0x01, 0x95);
 
 	// VMMC
-#if defined(CONFIG_MACH_LGE_VMMC_ALWAYSON_FORCED)	//20110504 FW1 KIMBYUNGCHUL SD_CARD_LOCKUP_IN_omap_hsmmc_resume_FUNC	 [START]
+#if defined(CONFIG_MACH_LGE_VMMC_ALWAYSON_FORCED) || defined(CONFIG_MACH_LGE_MMC_ALWAYSON)	//20110504 FW1 KIMBYUNGCHUL SD_CARD_LOCKUP_IN_omap_hsmmc_resume_FUNC	 [START]
 	//removed
 #else
+	#if defined (CONFIG_MACH_LGE_VMMC_AUTO_OFF)
+//none
+	#else
+
 	twl_i2c_write_u8(0x0D, 0x01, 0x98);
 	twl_i2c_write_u8(0x0D, 0x01, 0x99);
 	twl_i2c_write_u8(0x0D, 0x21, 0x9A);
+	#endif
+
 #endif	//CONFIG_MACH_LGE_VMMC_ALWAYSON_FORCED		//20110504 FW1 KIMBYUNGCHUL SD_CARD_LOCKUP_IN_omap_hsmmc_resume_FUNC	 [END]
 
  	//Logan_Test - put MOD, CON into DEVOFF mode
@@ -745,11 +656,6 @@ static int omap4_pm_suspend(void)
 	/* Enable Device OFF */
 	if (enable_off_mode)
 		omap4_device_off_set_state(1);
-/* LGE_CHANGE_S [hyunhee.jeon@lge.com] 2011-01-31, gpio resetting to remove IO lekeage */
-//	omap4_mux_nc_setting();
-//	omap4_gpio_normal_setting();
-//	set_mux_offmode();
-/* LGE_CHANGE_E [hyunhee.jeon@lge.com] 2011-01-31, gpio resetting to remove IO lekeage */
 
 	//kibum.lee
 //	omap_writel(0x7,0x4A306910);                         //RM_MPU_M3_RSTCTRL                                // reset
@@ -762,10 +668,6 @@ static int omap4_pm_suspend(void)
 	/* Disable Device OFF state*/
 	if (enable_off_mode)
 		omap4_device_off_set_state(0);
-
-/* LGE_CHANGE_S [hyunhee.jeon@lge.com] 2011-01-31, gpio resetting to remove IO lekeage */
-//	omap4_gpio_normal_setting();
-/* LGE_CHANGE_E [hyunhee.jeon@lge.com] 2011-01-31, gpio resetting to remove IO lekeage */
 
 	//kibum.lee
 	printk("count=%d, pre_mpu_m3_clkctrl=0x%x, CM_MPU_M3_MPU_M3_CLKCTRL: 0x%x\n", mpu_m3_clkctrl_count, mpu_m3_clkctrl, omap_readl(0x4A008920));

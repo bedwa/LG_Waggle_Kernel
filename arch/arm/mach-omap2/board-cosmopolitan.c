@@ -925,7 +925,7 @@ static struct omap2_hsmmc_info mmc[] = {
 		.gpio_wp	=	-EINVAL,
 		.ocr_mask	=	MMC_VDD_165_195,
 		.nonremovable	=	true,
-#if defined(CONFIG_PM_RUNTIME) && !defined(CONFIG_MACH_LGE_MMC_ALWAYSON)
+#if defined(CONFIG_PM_RUNTIME)
 		.power_saving	=	true,
 #endif
 	},
@@ -941,11 +941,11 @@ static struct omap2_hsmmc_info mmc[] = {
 #endif		
 		.nonremovable	=	false,
 		.ocr_mask	=	MMC_VDD_32_33,
-#if defined(CONFIG_MACH_LGE_VMMC_ALWAYSON_FORCED)	//20110504 FW1 KIMBYUNGCHUL SD_CARD_LOCKUP_IN_omap_hsmmc_resume_FUNC	[START]
+#if defined(CONFIG_MACH_LGE_VMMC_ALWAYSON_FORCED)||defined(CONFIG_MACH_LGE_MMC_ALWAYSON)	//20110504 FW1 KIMBYUNGCHUL SD_CARD_LOCKUP_IN_omap_hsmmc_resume_FUNC	[START]
 		.power_saving	=	false,
 
 #else
-  #if defined(CONFIG_PM_RUNTIME) && !defined(CONFIG_MACH_LGE_MMC_ALWAYSON)
+  #if defined(CONFIG_PM_RUNTIME) 
 		.power_saving	=	true,
   #endif
 #endif	//CONFIG_MACH_LGE_VMMC_ALWAYSON_FORCED		//20110504 FW1 KIMBYUNGCHUL SD_CARD_LOCKUP_IN_omap_hsmmc_resume_FUNC	[END]

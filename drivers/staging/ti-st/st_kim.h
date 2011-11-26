@@ -30,8 +30,14 @@
 /* time in msec to wait for
  * line discipline to be installed
  */
+#if 1//hsyoon 20110612
+#define LDISC_TIME	2000
+#define CMD_RESP_TIME	2000
+#else
 #define LDISC_TIME	500
 #define CMD_RESP_TIME	500
+#endif
+
 #define CMD_WR_TIME	5000  /* 5 sec */ /*[Soldel] - Faster Initscript Download time - ADDED*/
 #define MAKEWORD(a, b)  ((unsigned short)(((unsigned char)(a)) \
 	| ((unsigned short)((unsigned char)(b))) << 8))

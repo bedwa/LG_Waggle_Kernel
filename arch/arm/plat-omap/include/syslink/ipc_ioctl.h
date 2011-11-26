@@ -34,8 +34,7 @@ enum ipc_command_count {
 	SHAREDREGION_CMD_NOS = 13,
 	GATEMP_CMD_NOS = 13,
 	LISTMP_CMD_NOS = 19,
-	
-	MESSAGEQ_CMD_NOS = 19, //MESSAGEQ_CMD_NOS = 18,
+	MESSAGEQ_CMD_NOS = 19,
 	IPC_CMD_NOS = 5,
 	SYSMEMMGR_CMD_NOS = 6,
 	HEAPMEMMP_CMD_NOS = 15,
@@ -101,6 +100,7 @@ struct ipc_process_context {
 	spinlock_t res_lock;
 
 	struct ipc_device *dev;
+	pid_t tgid;
 };
 
 void add_pr_res(struct ipc_process_context *pr_ctxt, unsigned int cmd,

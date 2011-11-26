@@ -247,6 +247,9 @@ struct omap_vout_device {
 	struct early_suspend fb_disable_suspend_handler;	//disable suspend handler
 #endif
 
+	//Display Loop Mutex
+	struct mutex in_display_operation;
+
 };
 
 struct vout_platform_data {

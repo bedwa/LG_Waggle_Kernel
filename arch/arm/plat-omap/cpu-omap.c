@@ -38,7 +38,7 @@
 #include <plat/opp.h>
 #endif
 
-#define VERY_HI_RATE	900000000
+#define VERY_HI_RATE	1500000000
 
 static struct cpufreq_frequency_table *freq_table;
 

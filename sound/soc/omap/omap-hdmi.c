@@ -235,10 +235,14 @@ static void omap_hdmi_dai_shutdown(struct snd_pcm_substream *substream,
 	hdmi_w1_wrapper_disable(HDMI_WP);
 	hdmi_data.substream = NULL;
 
+// LGE_UPDATE_S 2011-07-01 for HDMI ACR workaround
+#if 0
 #ifdef CONFIG_OMAP_HDMI_AUDIO_WA
 	if (hdmi_lib_stop_acr_wa())
 		printk(KERN_WARNING "HDMI WA may be in bad state");
 #endif
+#endif
+// LGE_UPDATE_E 2011-07-01 for HDMI ACR workaround
 
 	return;
 }
@@ -306,11 +310,15 @@ static int omap_hdmi_dai_hw_params(struct snd_pcm_substream *substream,
 	snd_soc_dai_set_dma_data(dai, substream,
 				 &omap_hdmi_dai_dma_params);
 
+// LGE_UPDATE_S 2011-07-01 for HDMI ACR workaround
+#if	0
 #ifdef CONFIG_OMAP_HDMI_AUDIO_WA
 	err = hdmi_lib_start_acr_wa();
 	if (err)
 		printk(KERN_ERR "Failed to start ACR workaround[%d]]\n", err);
 #endif
+#endif
+// LGE_UPDATE_E 2011-07-01 for HDMI ACR workaround
 
 
 	return err;

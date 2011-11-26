@@ -3592,13 +3592,18 @@ static int __devinit twl6030_bci_battery_probe(struct platform_device *pdev)
 	twl_i2c_write_u8(0x0D, 0x00, 0x9E);
 
 #if defined(CONFIG_MACH_LGE_VMMC_ALWAYSON_FORCED)	//20110504 FW1 KIMBYUNGCHUL SD_CARD_LOCKUP_IN_omap_hsmmc_resume_FUNC	 [START]
-
-twl_i2c_write_u8(0x0D, 0x01, 0x98);
-twl_i2c_write_u8(0x0D, 0x15, 0x99);//twl_i2c_write_u8(0x0D, 0x15, 0x99);
-twl_i2c_write_u8(0x0D, 0xE1, 0x9A);
-
-	
+	twl_i2c_write_u8(0x0D, 0x01, 0x98);
+	twl_i2c_write_u8(0x0D, 0x15, 0x99);//twl_i2c_write_u8(0x0D, 0x15, 0x99);
+	twl_i2c_write_u8(0x0D, 0xE1, 0x9A);
+#else
+#if defined(CONFIG_MACH_LGE_MMC_ALWAYSON)
+	twl_i2c_write_u8(0x0D, 0x01, 0x98);
+	twl_i2c_write_u8(0x0D, 0x3F, 0x99);
+	twl_i2c_write_u8(0x0D, 0x21, 0x9A);
+#else
+	//
 #endif	//CONFIG_MACH_LGE_VMMC_ALWAYSON_FORCED		//20110504 FW1 KIMBYUNGCHUL SD_CARD_LOCKUP_IN_omap_hsmmc_resume_FUNC	 [END]
+#endif
 
 	return 0;
 

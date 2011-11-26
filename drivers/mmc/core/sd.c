@@ -617,22 +617,60 @@ sd_is_out:		// hyoungsuk.jang@lge.com 20110118 Freezing on SD removal : added on
 	}
 }
 
+//#ifdef CONFIG_MACH_LGE_COSMO_DOMASTIC
+void mmc_sd_speed_cntrol(struct mmc_host *host,int down_step)
+{
+	if (down_step == 1)
+	{
+		mmc_set_clock(host, 40000000); // it will be converted to 32MHz
+	}
+	else if (down_step == 2)
+	{
+		mmc_set_clock(host, 30000000); // it will be converted to 24MHz
+	}
+}
+
+EXPORT_SYMBOL(mmc_sd_speed_cntrol);
+//#endif
+
 /*
  * Suspend callback from host.
  */
+#ifdef CONFIG_MACH_LGE_MMC_ALWAYSON
 static int mmc_sd_suspend(struct mmc_host *host)
 {
 	BUG_ON(!host);
 	BUG_ON(!host->card);
-
+	
+	#if 0
 	mmc_claim_host(host);
+	
 	if (!mmc_host_is_spi(host))
 		mmc_deselect_cards(host);
 	host->card->state &= ~MMC_STATE_HIGHSPEED;
+	
+	mmc_release_host(host);
+	#endif
+
+	return 0;
+}
+#else
+static int mmc_sd_suspend(struct mmc_host *host)
+{
+	BUG_ON(!host);
+	BUG_ON(!host->card);
+	
+	mmc_claim_host(host);
+	
+	if (!mmc_host_is_spi(host))
+		mmc_deselect_cards(host);
+	host->card->state &= ~MMC_STATE_HIGHSPEED;
+	
 	mmc_release_host(host);
 
 	return 0;
 }
+#endif
 
 /*
  * Resume callback from host.
@@ -640,6 +678,7 @@ static int mmc_sd_suspend(struct mmc_host *host)
  * This function tries to determine if the same card is still present
  * and, if so, restore all state to it.
  */
+#ifdef CONFIG_MACH_LGE_MMC_ALWAYSON
 static int mmc_sd_resume(struct mmc_host *host)
 {
 	int err;
@@ -649,8 +688,9 @@ static int mmc_sd_resume(struct mmc_host *host)
 
 	BUG_ON(!host);
 	BUG_ON(!host->card);
-
+	#if 0
 	mmc_claim_host(host);
+	
 #ifdef CONFIG_MMC_PARANOID_SD_INIT
 	retries = 5;
 	while (retries) {
@@ -668,11 +708,45 @@ static int mmc_sd_resume(struct mmc_host *host)
 #else
 	err = mmc_sd_init_card(host, host->ocr, host->card);
 #endif
+	
 	mmc_release_host(host);
+	#endif
+	return 0;//err;
+}
+#else
+static int mmc_sd_resume(struct mmc_host *host)
+{
+	int err;
+#ifdef CONFIG_MMC_PARANOID_SD_INIT
+	int retries;
+#endif
 
+	BUG_ON(!host);
+	BUG_ON(!host->card);
+	mmc_claim_host(host);
+	
+#ifdef CONFIG_MMC_PARANOID_SD_INIT
+	retries = 5;
+	while (retries) {
+		err = mmc_sd_init_card(host, host->ocr, host->card);
+
+		if (err) {
+			printk(KERN_ERR "%s: Re-init card rc = %d (retries = %d)\n",
+			       mmc_hostname(host), err, retries);
+			mdelay(5);
+			retries--;
+			continue;
+		}
+		break;
+	}
+#else
+	err = mmc_sd_init_card(host, host->ocr, host->card);
+#endif
+	
+	mmc_release_host(host);
 	return err;
 }
-
+#endif
 static void mmc_sd_power_restore(struct mmc_host *host)
 {
 // hyoungsuk.jang 20110118 SD insertion/removal kernel panic [START]

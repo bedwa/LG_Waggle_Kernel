@@ -24,6 +24,7 @@
 #include "power.h"
 
 #define LGE_EARLYSUSPEND_DEBUG  1  //[20110131:geayoung.baek] suspend,resume monitoring
+int tiler_memory_free_flag=0;	   // kundong.kim@lge.com, kibum.lee@lge.com
 
 enum {
 	DEBUG_USER_STATE = 1U << 0,
@@ -106,6 +107,7 @@ static void early_suspend(struct work_struct *work)
 		pr_info("early_suspend: sync\n");
 
 	sys_sync();
+	tiler_memory_free_flag=1;	//tiler memory free kundong.kim@lge.com, kibum.lee@lge.com
 abort:
 	spin_lock_irqsave(&state_lock, irqflags);
 	if (state == SUSPEND_REQUESTED_AND_SUSPENDED)
@@ -118,6 +120,8 @@ static void late_resume(struct work_struct *work)
 	struct early_suspend *pos;
 	unsigned long irqflags;
 	int abort = 0;
+
+	tiler_memory_free_flag=0;	//tiler memory free kundong.kim@lge.com, kibum.lee@lge.com
 
 	mutex_lock(&early_suspend_lock);
 	spin_lock_irqsave(&state_lock, irqflags);

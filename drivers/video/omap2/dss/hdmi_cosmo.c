@@ -1725,6 +1725,11 @@ static void hdmi_status_to_off_with_status_lock(struct omap_dss_device *dssdev)
 	{
 		int retval =0;
 		pr_debug("test\n");
+		retval = omap_pm_set_min_bus_tput(&dssdev->dev,	OCP_INITIATOR_AGENT, -1);		
+		if (retval) {
+			pr_err("%s %d Error setting MPU cstr\n", __func__, __LINE__);
+			return; //return PM_UNSUPPORTED;
+		}
 		retval = omap_pm_set_max_mpu_wakeup_lat(&pm_hdmi_qos_handle, -1);
 		if (retval) {
 			pr_err("%s %d Error setting MPU cstr\n", __func__, __LINE__);
@@ -1856,11 +1861,29 @@ static int hdmi_status_move_to_with_status_lock(enum hdmi_internal_status new_st
 				hdmi.status.status = HDMI_STATUS_UNDEFINED;
 				return ret;
 			}
+// LGE_UPDATE_S 2011-07-01 for HDMI ACR workaround
+			//When connection established, audio parameters are fixed
+			//SO CTS can be sent from this phase
+#ifdef CONFIG_OMAP_HDMI_AUDIO_WA
+			DSSINFO("HDMI CTS start\n");
+			ret = hdmi_lib_start_acr_wa();
+			if ( ret )
+			{
+				DSSERR("Failed to start ACR workaround[%d]]\n", ret);
+				return ret;
+			}
+#endif
+// LGE_UPDATE_E 2011-07-01 for HDMI ACR workaround
 
 #ifdef CONFIG_OMAP_PM
 			{
 				int retval =0;
 				pr_debug("test\n");
+				retval = omap_pm_set_min_bus_tput(&dssdev->dev,	OCP_INITIATOR_AGENT, 200 * 1000 * 4);		
+				if (retval) {
+					pr_err("%s %d Error setting MPU cstr\n", __func__, __LINE__);
+					return; //return PM_UNSUPPORTED;
+				}
 				retval = omap_pm_set_max_mpu_wakeup_lat(&pm_hdmi_qos_handle,  IPU_PM_MM_MPU_LAT_CONSTRAINT);
 				if (retval) {
 					pr_err("%s %d Error setting MPU cstr\n", __func__, __LINE__);
@@ -1911,6 +1934,15 @@ static int hdmi_status_move_to_with_status_lock(enum hdmi_internal_status new_st
 		switch ( status )
 		{
 		case HDMI_STATUS_PLUG_ESTABLISHED:
+// LGE_UPDATE_S 2011-07-01 for HDMI ACR workaround
+			//CTS Should must be done before power off
+#ifdef CONFIG_OMAP_HDMI_AUDIO_WA
+			DSSINFO("HDMI CTS stop\n");
+			if (hdmi_lib_stop_acr_wa())
+				DSSERR("HDMI WA may be in bad state");
+#endif
+// LGE_UPDATE_E 2011-07-01 for HDMI ACR workaround
+
 			//to PLUG REQUEST
 			//not good
 
@@ -1933,6 +1965,11 @@ static int hdmi_status_move_to_with_status_lock(enum hdmi_internal_status new_st
 			{
 				int retval =0;
 				pr_debug("test\n");
+				retval = omap_pm_set_min_bus_tput(&dssdev->dev,	OCP_INITIATOR_AGENT, -1);		
+				if (retval) {
+					pr_err("%s %d Error setting MPU cstr\n", __func__, __LINE__);
+					return; //return PM_UNSUPPORTED;
+				}
 				retval = omap_pm_set_max_mpu_wakeup_lat(&pm_hdmi_qos_handle, -1);
 				if (retval) {
 					pr_err("%s %d Error setting MPU cstr\n", __func__, __LINE__);
@@ -2773,7 +2810,7 @@ static int hdmi_enable_s3d(struct omap_dss_device *dssdev, bool enable)
 	int r = 0;
 
 	mutex_lock(&hdmi.status_lock);
-	if ( enable && hdmi.status.status != HDMI_STATUS_PLUG_ESTABLISHED )
+	if ( enable && ( hdmi.status.status != HDMI_STATUS_PLUG_ESTABLISHED || !HDMI_is_device_connected() ) )
 	{
 		mutex_unlock(&hdmi.status_lock);
 		//DSSERR("HDMI Not plug established\n");
@@ -3113,6 +3150,13 @@ static void hdmi_disable_hdmi(void)
 	hdmi_check_status_and_transit();
 }
 
+static void hdmi_disable_hdmi_work_fn(struct work_struct *work)
+{
+	hdmi_disable_hdmi();
+}
+
+static struct work_struct hdmi_disable_work;
+
 static void hdmi_start_hdmi_video_delay_func(struct work_struct *data)
 {
 	if ( !HDMI_WP_get_video_status() )
@@ -3123,7 +3167,14 @@ static void hdmi_start_hdmi_video_delay_func(struct work_struct *data)
 		{
 			DSSERR("TV Go Bit Set. can't start HDMI Video. goto unplug\n");
 			dispc_stop(OMAP_DSS_CHANNEL_DIGIT);
-			hdmi_disable_hdmi();
+			//directly call hdmi_disable_hdmi() cause dead lock
+			//hdmi_disable_hdmi();
+
+			//I don't know workqueue in workqueue has no problem.
+			//when glancing workqueu code, there is no dead situation..
+			//@todo need verify
+			INIT_WORK(&hdmi_disable_work, hdmi_disable_hdmi_work_fn);
+			schedule_work(&hdmi_disable_work);
 			return;
 		}
 	}
@@ -3155,6 +3206,8 @@ static void hdmi_video_start_real_with_play_status_lock(int delay_m)
 			delay_m = 1000 / 10;
 		schedule_delayed_work(&hdmi.play_status.delayed_start_work, HZ * delay_m / 1000);
 		DSSDBG("HDMI Video will be Started in %d ms.\n", delay_m);
+		if ( hdmi.status.status!=HDMI_STATUS_PLUG_ESTABLISHED )
+			dump_stack();
 	}
 }
 

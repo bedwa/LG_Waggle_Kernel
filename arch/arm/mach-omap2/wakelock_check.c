@@ -16,6 +16,10 @@
 #include <linux/rtc.h> 
 #include <linux/cosmo/charger_rt9524.h>
 
+extern int tiler_memory_free_flag;
+extern void tmm_dmm_free_page_stack(void);
+extern bool dss_get_mainclk_state(void);
+
 static void wakelock_check_wq (struct work_struct *unused);
 struct timer_list wakelock_check_timer;
 
@@ -95,6 +99,23 @@ static void wakelock_check_wq (struct work_struct *unused)
 	}
 	else
 		abnormal_wake_unlock_call(0);							// kibum.lee@lge.com
+
+	if(tiler_memory_free_flag > 1)
+	{
+		printk(KERN_INFO "free tmm_dmm, tiler_memory_free_flag =%d\n", tiler_memory_free_flag);
+		if(dss_get_mainclk_state() == false)
+		{
+			tmm_dmm_free_page_stack();	 //tiler memory free kundong.kim@lge.com, kibum.lee@lge.com
+			tiler_memory_free_flag=0;		
+		}
+	}
+
+	if (tiler_memory_free_flag ==1)
+	{
+		tiler_memory_free_flag++;	
+		//tiler_memory_free_flag=0;		
+	}
+
 #endif// <--]
 }
 

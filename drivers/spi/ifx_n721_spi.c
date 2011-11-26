@@ -596,7 +596,11 @@ ifx_spi_probe(struct spi_device *spi)
 	 * muic_interrupt_handler merely calls schedule_work() with muic_wq_func().
 	 * muic_wq_func() actually performs the accessory detection.
 	 */
+#ifdef CONFIG_MACH_LGE_COSMO_DOMASTIC
+	ret = request_irq(gpio_to_irq(CP_CRASH_INT_N), CP_CRASH_interrupt_handler, IRQF_TRIGGER_FALLING, "cp_crash_irq", &spi->dev);
+#else
 	ret = request_irq(gpio_to_irq(CP_CRASH_INT_N), CP_CRASH_interrupt_handler, IRQF_TRIGGER_RISING, "cp_crash_irq", &spi->dev);
+#endif
 	if (ret < 0) {
 		printk(KERN_INFO "[CP CRASH IRQ] GPIO#%03d IRQ line set up failed!\n", CP_CRASH_INT_N);
 		free_irq(gpio_to_irq(CP_CRASH_INT_N), &spi->dev);
@@ -645,8 +649,11 @@ static void CP_CRASH_wq_func(struct work_struct *cp_crash_wq)
 	printk(KERN_INFO "(%d-%02d-%02d %02d:%02d:%02d.%09lu UTC)\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
 			tm.tm_hour, tm.tm_min, tm.tm_sec, ts.tv_nsec);	
 // CHEOLGWAK  2011-5-14 delayed work queue
+#ifdef CONFIG_MACH_LGE_COSMO_DOMASTIC
+	if(!gpio_get_value(CP_CRASH_INT_N)){
+#else
 	if(gpio_get_value(CP_CRASH_INT_N)){
-
+#endif
 #if 0   // hyoungsuk.jang@lge.com prevent to make panic
 		*make_panic = 0xDEAD;	
 #endif

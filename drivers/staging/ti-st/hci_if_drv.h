@@ -105,7 +105,10 @@ enum {
 /* This value should be raised after debugging session */
 #define HCIIFDRV_READ_TIMEOUT 					10000
 /* Reg time out defined to 6 seconds */
-#define HCIIFDRV_REG_TIMEOUT 					6000
+
+//GIGI temp modified
+//#define HCIIFDRV_REG_TIMEOUT 					6000
+#define HCIIFDRV_REG_TIMEOUT 					60000
 
 /* HCI IF Drv max number of clients */
 #define HCIIF_CMD_CLIENTS_NUM					8

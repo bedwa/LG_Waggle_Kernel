@@ -25,7 +25,7 @@
 #include <linux/delay.h>
 #include <linux/wait.h>
 #include <linux/gpio.h>
-
+#include <linux/rtc.h> 
 #include <linux/sched.h>
 
 #include "st_kim.h"
@@ -51,8 +51,6 @@
 #define ST_KIM_DBG(fmt, arg...)
 #define ST_KIM_VER(fmt, arg...)
 #endif
-
-
 
 
 static int kim_probe(struct platform_device *pdev);
@@ -198,14 +196,18 @@ void kim_int_recv(const unsigned char *data, long count)
 	struct hci_event_hdr *eh;
 	register int len = 0, type = 0;
 
-	ST_KIM_DBG("%s", __func__);
+#if defined(SHOW_ST_LOG) //hsyoon 20110605 -remove log
+	printk("%s( %d )\n", __func__, count);
+#endif
 	/* Decode received bytes here */
 	ptr = (char *)data;
 	if (unlikely(ptr == NULL)) {
 		ST_KIM_ERR(" received null from TTY ");
 		return;
 	}
+	
 	while (count) {
+		//printk("[%s] Enter\n", __func__);
 		if (kim_gdata->rx_count) {
 			len = min_t(unsigned int, kim_gdata->rx_count, count);
 			memcpy(skb_put(kim_gdata->rx_skb, len), ptr, len);
@@ -261,9 +263,18 @@ void kim_int_recv(const unsigned char *data, long count)
 		} /* not necessary in this case */
 		bt_cb(kim_gdata->rx_skb)->pkt_type = type;
 	}			/* end of while count */
+
+  mdelay(1); //hsyoon 20110628
+  complete_all(&kim_gdata->kim_rcvd);//hsyoon 20110616
+
 	ST_KIM_DBG("done %s", __func__);
+	//printk("[%s] End\n", __func__);
 	return;
 }
+
+#if 1//TI HSYoon 20110613
+extern struct st_data_s *st_gdata;//required for st_kim.c
+#endif 
 
 static long read_local_version(char *bts_scr_name)
 {
@@ -272,10 +283,13 @@ static long read_local_version(char *bts_scr_name)
 	ST_KIM_DBG("%s", __func__);
 
 	INIT_COMPLETION(kim_gdata->kim_rcvd);
+  spin_lock(&st_gdata->lock);
 	if (4 != st_int_write(read_ver_cmd, 4)) {
 		ST_KIM_ERR("kim: couldn't write 4 bytes");
+    spin_unlock(&st_gdata->lock);
 		return ST_ERR_FAILURE;
 	}
+  spin_unlock(&st_gdata->lock);
 
 	if (!wait_for_completion_timeout
 	    (&kim_gdata->kim_rcvd, msecs_to_jiffies(CMD_RESP_TIME))) {
@@ -309,6 +323,7 @@ static long download_firmware(void)
 	unsigned char bts_scr_name[30] = { 0 };	/* 30 char long bts scr name? */
 
 	ST_KIM_VER("%s", __func__);
+	ST_LOG("[%s] Enter\n", __func__);
 
 /*[Soldel] - Faster Initscript download time - BEGIN*/
 	int wr_room_space;
@@ -316,10 +331,13 @@ static long download_firmware(void)
 	unsigned long timeout;
 /*[Soldel] - Faster Initscript download time - END*/
 
+	//spin_lock(&st_gdata->lock);//TI HSYoon 20110613
 
 	err = read_local_version(bts_scr_name);
 	if (err != ST_SUCCESS) {
 		ST_KIM_ERR("kim: failed to read local ver");
+		
+		//spin_unlock(&st_gdata->lock);//TI HSYoon 20110613
 		return err;
 	}
 	err =
@@ -329,6 +347,8 @@ static long download_firmware(void)
 		     (kim_gdata->fw_entry->size == 0))) {
 		ST_KIM_ERR(" request_firmware failed(errno %ld) for %s", err,
 			   bts_scr_name);
+		
+		//spin_unlock(&st_gdata->lock);//TI HSYoon 20110613
 		return ST_ERR_FAILURE;
 	}
 	ptr = (void *)kim_gdata->fw_entry->data;
@@ -339,12 +359,16 @@ static long download_firmware(void)
 	ptr += sizeof(struct bts_header);
 	len -= sizeof(struct bts_header);
 	init_completion(&kim_gdata->kim_rcvd); /*[Soldel] - Faster Initscript download time - ADDED*/
+	//spin_unlock(&st_gdata->lock);//TI HSYoon 20110613
 
 	while (len > 0 && ptr) {
+		
 		ST_KIM_VER(" action size %d, type %d ",
 			   ((struct bts_action *)ptr)->size,
 			   ((struct bts_action *)ptr)->type);
-
+		
+		//spin_lock(&st_gdata->lock);//TI HSYoon 20110613
+		
 		switch (((struct bts_action *)ptr)->type) {
 		case ACTION_SEND_COMMAND:	/* action send */
 			action_ptr = &(((struct bts_action *)ptr)->data[0]);
@@ -359,8 +383,9 @@ static long download_firmware(void)
 				break;
 			}
 
+      INIT_COMPLETION(kim_gdata->kim_rcvd);
 			/*INIT_COMPLETION(kim_gdata->kim_rcvd);*/ /*[Soldel] - Faster Initscript download time - COMMENTED*/
-			
+   			
 /*[Soldel] - Faster Initscript download time - BEGIN*/			
 			/*
 			 * Make sure we have enough free space in uart
@@ -386,16 +411,18 @@ static long download_firmware(void)
 					"free space in uart tx buffer");
 				release_firmware(kim_gdata->fw_entry);
 				return -1;
-			}			
+			}
 			/*
 			 * Free space found in uart buffer, call st_int_write
 			 * to send current firmware command to the uart tx
 			 * buffer.
 			 */
 /*[Soldel] - Faster Initscript download time - END*/
+      spin_lock(&st_gdata->lock);
 			err = st_int_write(((struct bts_action_send *)
 					    action_ptr)->data,
 					   ((struct bts_action *)ptr)->size);
+      spin_unlock(&st_gdata->lock);
 			if (unlikely(err < 0)) {
 				release_firmware(kim_gdata->fw_entry);
 				return ST_ERR_FAILURE;
@@ -421,7 +448,10 @@ static long download_firmware(void)
 				release_firmware(kim_gdata->fw_entry);
 				return ST_ERR_FAILURE;
 			}
+
+#if 1//hsyoon 20110616
 			init_completion(&kim_gdata->kim_rcvd); /*[Soldel] - Faster Initscript Download time - ADDED*/
+#endif
 			break;
 		case ACTION_DELAY:	/* sleep */
 			ST_KIM_DBG("sleep command in scr");
@@ -435,9 +465,12 @@ static long download_firmware(void)
 		ptr =
 		    ptr + sizeof(struct bts_action) +
 		    ((struct bts_action *)ptr)->size;
+		
+		//spin_unlock(&st_gdata->lock);//TI HSYoon 20110613
 	}
 	/* fw download complete */
 	release_firmware(kim_gdata->fw_entry);
+	ST_LOG("[%s] End\n", __func__);
 	return ST_SUCCESS;
 }
 
@@ -449,10 +482,11 @@ static long download_firmware(void)
  */
 void st_kim_chip_toggle(enum gpio_t gpio_id, enum kim_gpio_state state)
 {
-	ST_KIM_DBG(" %s ", __func__);
+	ST_KIM_ERR(" %s ", __func__);
+	ST_KIM_ERR("******gpio_id : %d, state : %d, kim_gdata->gpios[gpio_id] : %d\n", gpio_id, state, kim_gdata->gpios[gpio_id]);
 
 	if (gpio_id >= ST_GPIO_MAX || kim_gdata->gpios[gpio_id] == -1) {
-		ST_KIM_DBG(" gpio not requested for protocol %s",
+		ST_KIM_ERR(" gpio not requested for protocol %s",
 			   protocol_names[gpio_id]);
 		return;
 	}
@@ -463,10 +497,12 @@ void st_kim_chip_toggle(enum gpio_t gpio_id, enum kim_gpio_state state)
 		break;
 
 	case ST_GPIO_FM:
+		/*
 		if (state == KIM_GPIO_ACTIVE)
 			gpio_set_value(kim_gdata->gpios[ST_GPIO_FM], GPIO_LOW);
 		else
 			gpio_set_value(kim_gdata->gpios[ST_GPIO_FM], GPIO_HIGH);
+			*/
 		break;
 	case ST_GPIO_GPS:
 		if (state == KIM_GPIO_ACTIVE)
@@ -493,16 +529,20 @@ void st_kim_chip_toggle(enum gpio_t gpio_id, enum kim_gpio_state state)
 void st_kim_recv(const unsigned char *data, long count)
 {
 	ST_KIM_DBG(" %s ", __func__);
+	
+	//spin_lock(&st_gdata->lock);//TI HSYoon 20110613
 	/* copy to local buffer */
 	if (unlikely(data[4] == 0x01 && data[5] == 0x10 && data[0] == 0x04)) {
 		/* must be the read_ver_cmd */
 		memcpy(kim_gdata->resp_buffer, data, count);
 		complete_all(&kim_gdata->kim_rcvd);
+		//spin_unlock(&st_gdata->lock);//TI HSYoon 20110613
 		return;
 	} else {
 		kim_int_recv(data, count);
 		/* either completes or times out */
 	}
+	//spin_unlock(&st_gdata->lock);//TI HSYoon 20110613
 	return;
 }
 
@@ -542,55 +582,92 @@ static void pad_config(unsigned long pad_addr, u32 andmask, u32 ormask)
 long st_kim_start(void)
 {
 	long err = ST_SUCCESS;
-	long retry = POR_RETRY_COUNT;
+	long retry = POR_RETRY_COUNT;//hsyoon 20110616
+	//int is_sent_ldisc_install = 0;//hsyoon 20110612//hsyoon 20110616
+    int is_ldisc_on = 0; //cmlee 20110627
 	ST_KIM_DBG(" %s", __func__);
+  ST_LOG("st_kim_start enter....................\n");
 
 	do {
-		pad_config(0x4A100170, 0x0, 0x000B000B); 
+    
+		//pad_config(0x4A100170, 0x0, 0x000B000B); //hsyoon 20110612
 		/* Configure BT nShutdown to LOW state */
 		gpio_set_value(kim_gdata->gpios[ST_GPIO_BT], GPIO_LOW);
-			mdelay(5);	/* FIXME: a proper toggle */
+		if(POR_RETRY_COUNT == retry) //hsyoon 20110616
+			mdelay(100);	/* FIXME: a proper toggle */ //hsyoon 20110612
+		else
+			mdelay(1000);
+
 
 		/* Configure BT nShutdown to HIGH state */
 		gpio_set_value(kim_gdata->gpios[ST_GPIO_BT], GPIO_HIGH);
-			mdelay(100);
+#if 1    /* hsyoon_20110610 */
+		mdelay(15);
+		gpio_set_value(kim_gdata->gpios[ST_GPIO_BT], GPIO_LOW);
+		mdelay(1);	/* FIXME: a proper toggle */
+		gpio_set_value(kim_gdata->gpios[ST_GPIO_BT], GPIO_HIGH);
+		mdelay(100);	/* FIXME: a proper toggle *///hsyoon 20110612
+#endif
 
 		/* re-initialize the completion */
-		INIT_COMPLETION(kim_gdata->ldisc_installed);
-		/* send signal to UIM */
-		err = kill_pid(find_get_pid(kim_gdata->uim_pid), SIGUSR2, 0);
-		if (err != 0) {
-			ST_KIM_VER(" sending SIGUSR2 to uim failed %ld", err);
-			err = ST_ERR_FAILURE;
-			continue;
-		}
-		/* wait for ldisc to be installed */
-		err = wait_for_completion_timeout(&kim_gdata->ldisc_installed,
-				msecs_to_jiffies(LDISC_TIME));
-		if (!err) {	/* timeout */
-			ST_KIM_ERR("line disc installation timed out ");
-			err = ST_ERR_FAILURE;
-			continue;
-		} else {
-			/* ldisc installed now */
-			ST_KIM_DBG(" line discipline installed ");
-			err = download_firmware();
-			if (err != ST_SUCCESS) {
-				ST_KIM_ERR("download firmware failed");
+		if(!is_ldisc_on) //cmlee 20110627
+		{
+			INIT_COMPLETION(kim_gdata->ldisc_installed);//hsyoon 20110616
+			/* send signal to UIM */
+			err = kill_pid(find_get_pid(kim_gdata->uim_pid), SIGUSR2, 0);
+			ST_LOG("sending SIGUSR2 to uim....................\n");
+
+			if (err != 0) {
+				ST_LOG(" sending SIGUSR2 to uim failed %ld", err);
+				err = ST_ERR_FAILURE;
 				continue;
-			} else {	/* on success don't retry */
-				break;
+			}
+			/* wait for ldisc to be installed */
+			err = wait_for_completion_timeout(&kim_gdata->ldisc_installed, msecs_to_jiffies(LDISC_TIME));
+
+			if (!err) {	/* timeout */
+				ST_KIM_ERR("line disc installation timed out ");
+				err = ST_ERR_FAILURE;
+				continue;
 			}
 		}
+
+    // now ldisc on !
+     
+    {
+      /* ldisc installed now */
+      is_ldisc_on = 1;  // cmlee
+      ST_KIM_DBG(" line discipline installed ");
+      err = download_firmware();
+      if (err != ST_SUCCESS)
+      {
+        ST_KIM_ERR("download firmware failed");
+        continue;
+      }
+      else
+      { /* on success don't retry */
+        struct timespec ts;  
+        struct rtc_time tm;  
+        getnstimeofday(&ts);
+        rtc_time_to_tm(ts.tv_sec, &tm);  
+
+        ST_KIM_ERR("%d-%02d-%02d %02d:%02d:%02d.%09lu download firmware success",tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,  tm.tm_hour, tm.tm_min, tm.tm_sec, ts.tv_nsec);
+        break;
+      }
+	}
 	} while (retry--);
 	return err;
 }
+
 
 /* called from ST Core, on the last un-registration
 */
 long st_kim_stop(void)
 {
 	long err = ST_SUCCESS;
+	int timeout_cnt;//hsyoon 20110616
+	
+  timeout_cnt = 2000;//hsyoon 20110616
 
 	INIT_COMPLETION(kim_gdata->ldisc_installed);
 	/* send signal to UIM */
@@ -605,7 +682,7 @@ long st_kim_stop(void)
 			msecs_to_jiffies(LDISC_TIME));
 	if (!err) {		/* timeout */
 		ST_KIM_ERR(" timed out waiting for ldisc to be un-installed");
-		return ST_ERR_FAILURE;
+		//return ST_ERR_FAILURE; //hsyoon 20110612
 	}
 
 		/* By default configure BT nShutdown to LOW state */
@@ -666,7 +743,7 @@ static int kim_toggle_radio(void *data, enum rfkill_state state)
 	enum gpio_t gpio_id = (unsigned char)data;
 	unsigned char protoid = 0;
 
-	ST_KIM_DBG(" %s ", __func__);
+	ST_KIM_ERR(" %s ", __func__);
 	if (gpio_id == ST_GPIO_BT)
 	{
 		/* Configure BT nShutdown to HIGH state */
@@ -689,13 +766,14 @@ static int kim_toggle_radio(void *data, enum rfkill_state state)
 				st_kim_chip_toggle(gpio_id, KIM_GPIO_INACTIVE);
 		break;
 			default:
-				printk(KERN_ERR "invalid rfkill state %d", state);
+				ST_LOG(KERN_ERR "invalid rfkill state %d", state);
 		}
 	}
 	else
 	{
-		printk(KERN_ERR "invalid gpio %d", gpio_id);
+		ST_LOG(KERN_ERR "invalid gpio %d", gpio_id);
 	}
+	mdelay(5);
 	return ST_SUCCESS;
 }
 #endif

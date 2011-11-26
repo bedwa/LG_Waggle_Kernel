@@ -25,8 +25,8 @@ done
 
 echo "##############building kernel HWVER = ${HWVER} ####################"
 
-make ${CLEAN} ARCH=arm CROSS_COMPILE=~/android-ndk-r7/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi- cosmo_${HWVER}_defconfig
-make ${CLEAN} -j8 ARCH=arm CROSS_COMPILE=~/android-ndk-r7/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin/arm-linux-androideabi- uImage
+make ${CLEAN} ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- cosmo_${HWVER}_defconfig
+make ${CLEAN} -j8 ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- uImage
 
 #if [ ! -d ${IMAGE_PART1} ]
 #then

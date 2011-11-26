@@ -12,36 +12,36 @@
  #else
  #define DEBUG_MSG(args...)
  #endif
- 
 
+ //ANDY_PORTING OSP [woongchang.kim@lge.com 110331]
+int g_osp_lcd_level = 0;
+//ANDY_END
+
+struct lm3528_platform_data*	 plm3528data = NULL;
 static int	old_brightness	=	-1;
 extern int lm3528_brightness_3D_Enable;
 /* SYSFS for brightness control
  */
-static ssize_t	brightness_show(struct device* dev,
-								struct device_attribute* attr, char* buf)
+
+int lm3528_getBrightness(void)
 {
-	struct lm3528_platform_data*	pdata	=	dev->platform_data;
-	int		val;
+	struct lm3528_platform_data*	pdata	=	plm3528data;
+	int val = 0;
 
-	if ((val = lm3528_get_bmain(&pdata->private)) < 0)
-		return	0;
+	if(pdata == NULL) return 0;
 
-	return	snprintf(buf, PAGE_SIZE, "%d\n", val);
+	val = lm3528_get_bmain(&pdata->private);
+
+	return val;
 }
 
-//ANDY_PORTING OSP [woongchang.kim@lge.com 110331]
-int g_osp_lcd_level = 0;
-//ANDY_END
-
-static ssize_t brightness_store(struct device* dev,
-								struct device_attribute* attr,
-								const char* buf, size_t count)
+ssize_t lm3528_setBrightness(int		brightness, size_t count)
 {
-	struct lm3528_platform_data*	pdata	=	dev->platform_data;
-	int		brightness	=	simple_strtol(buf, NULL, 10);
+	struct lm3528_platform_data*	pdata	=	plm3528data;
 
 	DEBUG_MSG("brightness_store = [%d][%d] \n",brightness, lm3528_brightness_3D_Enable);
+
+	if(pdata == NULL) return 0;
 
 	if (brightness > 0 && brightness < 30)	// MIN brightness to be off
 		brightness	=	30;
@@ -130,9 +130,33 @@ static ssize_t brightness_store(struct device* dev,
 	lm3528_set_bmain(&pdata->private, brightness);
 
 	old_brightness	=	brightness;
+	
+	exit:
+		return	count;
 
-exit:
-	return	count;
+}
+
+
+static ssize_t	brightness_show(struct device* dev,
+								struct device_attribute* attr, char* buf)
+{
+	struct lm3528_platform_data*	pdata	=	dev->platform_data;
+	int		val;
+
+	if ((val = lm3528_get_bmain(&pdata->private)) < 0)
+		return	0;
+
+	return	snprintf(buf, PAGE_SIZE, "%d\n", val);
+}
+
+static ssize_t brightness_store(struct device* dev,
+								struct device_attribute* attr,
+								const char* buf, size_t count)
+{
+	struct lm3528_platform_data*	pdata	=	dev->platform_data;
+	int		brightness	=	simple_strtol(buf, NULL, 10);
+
+	return lm3528_setBrightness(brightness, count);
 }
 
 static DEVICE_ATTR(brightness, 0664, brightness_show, brightness_store);
@@ -172,6 +196,7 @@ static int __init lm3528bl_probe(struct i2c_client* client,
 	int		ret = 0;
 
 	pdata	=	client->dev.platform_data;
+	plm3528data = pdata;
 	gpio_request(pdata->gpio_hwen, "backlight_enable");
 	gpio_direction_output(pdata->gpio_hwen, 1);	// OUTPUT
 

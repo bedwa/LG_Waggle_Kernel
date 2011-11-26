@@ -46,7 +46,7 @@ static struct ll_struct_s *ll;
 #include <linux/init.h>
 #include <linux/tty.h>
 
-static struct semaphore st_hcill_sem;//hsyoon
+//static struct semaphore st_hcill_sem;//hsyoon
 #endif
 
 
@@ -55,8 +55,14 @@ static struct semaphore st_hcill_sem;//hsyoon
 static void send_ll_cmd(unsigned char cmd)
 {
 
+#if 0//hsyoon 20110622
+	down(&st_hcill_sem);
+#endif
 	ST_LL_DBG("%s: writing %x", __func__, cmd);
 	st_int_write(&cmd, 1);
+#if 0//hsyoon 20110622
+	up(&st_hcill_sem);
+#endif
 	return;
 }
 
@@ -83,6 +89,7 @@ static void ll_device_want_to_wakeup(void)
 	case ST_LL_ASLEEP_TO_AWAKE:
 		/* duplicate wake_ind */
 		ST_LL_ERR("duplicate wake_ind while waiting for Wake ack");
+		send_ll_cmd(LL_WAKE_UP_ACK);	//hsyoon 20110623 we must ack unconditonally
 		break;
 	case ST_LL_AWAKE:
 		/* duplicate wake_ind */
@@ -123,7 +130,7 @@ void st_ll_disable(void)
 /* called when ST Core wants to update the state */
 void st_ll_wakeup(void)
 {
-#if 1    /* TIK_BT OPP fail issue */
+#if 0    /* TIK_BT OPP fail issue *///hsyoon 20110616 
 	down(&st_hcill_sem);
 #endif	 
 	if (likely(ll->ll_state != ST_LL_AWAKE)) {
@@ -133,7 +140,7 @@ void st_ll_wakeup(void)
 		/* don't send the duplicate wake_indication */
 		ST_LL_ERR(" Chip already AWAKE ");
 	}
-#if 1    /* TIK_BT OPP fail issue */
+#if 0    /* TIK_BT OPP fail issue *///hsyoon 20110616 
 	up(&st_hcill_sem);
 #endif	 	
 }
@@ -148,7 +155,7 @@ unsigned long st_ll_getstate(void)
 /* called from ST Core, when a PM related packet arrives */
 unsigned long st_ll_sleep_state(unsigned char cmd)
 {
-#if 1    /* TIK_BT OPP fail issue */
+#if 0    /* TIK_BT OPP fail issue */
 	down(&st_hcill_sem);
 #endif	 
 	switch (cmd) {
@@ -169,12 +176,12 @@ unsigned long st_ll_sleep_state(unsigned char cmd)
 		break;
 	default:
 		ST_LL_ERR(" unknown input/state ");
-#if 1    /* TIK_BT OPP fail issue */
+#if 0    /* TIK_BT OPP fail issue */
 		up(&st_hcill_sem);
 #endif	 	
 		return ST_ERR_FAILURE;
 	}
-#if 1    /* TIK_BT OPP fail issue */
+#if 0    /* TIK_BT OPP fail issue */
 	up(&st_hcill_sem);
 #endif	 	
 	return ST_SUCCESS;
@@ -185,7 +192,7 @@ long st_ll_init(void)
 {
 	long err = ST_SUCCESS;
 
-#if 1    /* TIK_BT OPP fail issue */
+#if 0    /* TIK_BT OPP fail issue */
 	init_MUTEX(&st_hcill_sem);
 #endif 
 	/* Allocate memory for ST LL private structure */

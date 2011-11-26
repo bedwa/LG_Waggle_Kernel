@@ -2023,6 +2023,8 @@ int hdmi_rxdet(void)
 	else
 		state = (val1 & 1);
 
+/* LGE_CHANGE [wonki.choi@lge.com] DSS not sleep 2011-6-28 */
+#if !defined(CONFIG_MACH_LGE_COSMOPOLITAN)
 	/* Turn on the wakeup capability of the interrupts
 	It is recommended to turn on opposite interrupt wake
 	up capability in connected and disconnected state.
@@ -2041,6 +2043,8 @@ int hdmi_rxdet(void)
 		IrqHdmiVectorEnable.phyConnect = 1;
 		hdmi_w1_irq_wakeup_enable(&IrqHdmiVectorEnable);
 	}
+#endif
+/* LGE_CHANGE_E [wonki.choi@lge.com] 2011-6-28 */
 
 	return state;
 }

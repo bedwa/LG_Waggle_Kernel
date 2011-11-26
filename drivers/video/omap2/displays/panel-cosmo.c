@@ -132,8 +132,13 @@ static struct omap_dm_timer *s3d_pwm_timer = NULL;
 int lm3528_brightness_3D_Enable = 0;
 static int oldBacklightBrightness = -1;
 
+extern int lm3528_getBrightness(void);
+extern ssize_t lm3528_setBrightness(int		brightness, size_t count);
 int panel_cosmo_brightness_read(void)
 {
+#if 1
+	return lm3528_getBrightness();
+#else
 	char buf[10];
 	int tempbrightness = 0;
 	
@@ -163,12 +168,17 @@ int panel_cosmo_brightness_read(void)
 	set_fs(oldfs);
 
 	return tempbrightness;
+#endif	
 }
 
 void panel_cosmo_brightness_write(int value)
 
 {
-	
+#if 1
+	if(value == -1) return;
+
+	lm3528_setBrightness(value, 0);
+#else
 	int h_file = 0;
 	int ret = 0;
 	char buf[10];
@@ -191,6 +201,7 @@ void panel_cosmo_brightness_write(int value)
 		sys_close(h_file);
 	}
 	set_fs(oldfs);
+#endif
 }
 #endif
 

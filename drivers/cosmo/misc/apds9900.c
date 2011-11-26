@@ -89,8 +89,8 @@
 #define PTIME 	 	0xff 	// 2.72ms . minimum Prox integration time
 #define INT_PERS 	0x33
 
-#if defined(CONFIG_MACH_LGE_COSMO_DOMASTIC) && defined(CONFIG_MACH_LGE_COSMO_DOMASTIC_REV_B)
-//SU760_Rev_B,A
+#if defined(CONFIG_MACH_LGE_COSMO_DOMASTIC)
+//SU760
 #define PPCOUNT 	8
 #elif  !defined(CONFIG_MACH_LGE_COSMO_EVB_C) && !defined(CONFIG_MACH_LGE_COSMO_REV_A) && !defined(CONFIG_MACH_LGE_COSMO_REV_B) && !defined(CONFIG_MACH_LGE_COSMO_REV_C)
 //Rev_D
