@@ -1,7 +1,7 @@
 /*
  * Automatically generated C config: don't edit
  * Linux kernel version: 2.6.35.7
- * Sat Nov 26 13:56:56 2011
+ * Mon Nov 28 09:49:48 2011
  */
 #define AUTOCONF_INCLUDED
 #define CONFIG_ARCH_OMAP 1

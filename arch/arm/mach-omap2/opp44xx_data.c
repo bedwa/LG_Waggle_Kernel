@@ -54,15 +54,17 @@ static bool bootup_m3_with_maxclcok =1;
  * migrates to ES2.1
  */
 static struct omap_opp_def __initdata omap44xx_pre_es2_1_opp_def_list[] = {
-	/* MPU OPP1 - OPP50 */
+	/* MPU OPP1 - OPPLOW */
+	OMAP_OPP_DEF("mpu", true, 100000000, 930000),
+	/* MPU OPP2 - OPP50 */
 	OMAP_OPP_DEF("mpu", true, 300000000, 930000),
-	/* MPU OPP2 - OPP100 */
+	/* MPU OPP3 - OPP100 */
 	OMAP_OPP_DEF("mpu", true, 600000000, 1100000),
-	/* MPU OPP3 - OPP-Turbo */
+	/* MPU OPP4 - OPP-Turbo */
 	OMAP_OPP_DEF("mpu", true, 800000000, 1260000),
-	/* MPU OPP4 - OPP-SB */
+	/* MPU OPP5 - OPP-SB */
 	OMAP_OPP_DEF("mpu", true, 1008000000, 1350000),
-	/* MPU OPP5 - OPP-JET */
+	/* MPU OPP6 - OPP-JET */
 	OMAP_OPP_DEF("mpu", true, JET_FREQ, 1375000),
 	/* IVA OPP1 - OPP50_98 */
 	OMAP_OPP_DEF("iva", true,  133000000, 928000),
@@ -109,15 +111,17 @@ static struct omap_opp_def __initdata omap44xx_pre_es2_1_opp_def_list[] = {
 };
 
 static struct omap_opp_def __initdata omap44xx_opp_def_list[] = {
-	/* MPU OPP1 - OPP50 */
+	/* MPU OPP1 - OPPLOW */
+	OMAP_OPP_DEF("mpu", true, 100000000, 930000),
+	/* MPU OPP2 - OPP50 */
 	OMAP_OPP_DEF("mpu", true, 300000000, 930000),
-	/* MPU OPP2 - OPP100 */
+	/* MPU OPP3 - OPP100 */
 	OMAP_OPP_DEF("mpu", true, 600000000, 1100000),
-	/* MPU OPP3 - OPP-Turbo */
+	/* MPU OPP4 - OPP-Turbo */
 	OMAP_OPP_DEF("mpu", true, 800000000, 1260000),
-	/* MPU OPP4 - OPP-SB */
+	/* MPU OPP5 - OPP-SB */
 	OMAP_OPP_DEF("mpu", true, 1008000000, 1350000),
-	/* MPU OPP5 - OPP-JET */
+	/* MPU OPP6 - OPP-JET */
 	OMAP_OPP_DEF("mpu", true, 1200000000, 1375000),
 	/* IVA OPP1 - OPP50_98 */
 	OMAP_OPP_DEF("iva", true,  133000000, 928000),
