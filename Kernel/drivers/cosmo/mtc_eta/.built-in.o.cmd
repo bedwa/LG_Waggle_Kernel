@@ -1,0 +1,1 @@
+cmd_drivers/cosmo/mtc_eta/built-in.o :=  /home/user/Kernel/tcc/bin/arm-none-eabi-ld -EL    -r -o drivers/cosmo/mtc_eta/built-in.o drivers/cosmo/mtc_eta/event_logger.o drivers/cosmo/mtc_eta/key_event_handler.o drivers/cosmo/mtc_eta/touch_event_handler.o 

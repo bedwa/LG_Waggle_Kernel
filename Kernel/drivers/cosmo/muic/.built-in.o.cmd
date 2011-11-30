@@ -1,0 +1,1 @@
+cmd_drivers/cosmo/muic/built-in.o :=  /home/user/Kernel/tcc/bin/arm-none-eabi-ld -EL    -r -o drivers/cosmo/muic/built-in.o drivers/cosmo/muic/cosmo_muic.o drivers/cosmo/muic/cosmo_muic_maxim.o drivers/cosmo/muic/cosmo_muic_ti.o drivers/cosmo/muic/cosmo_fota.o 

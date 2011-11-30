@@ -1,0 +1,1 @@
+cmd_drivers/dsp/syslink/procmgr/proc4430/syslink_proc4430.o := /home/user/Kernel/tcc/bin/arm-none-eabi-ld -EL    -r -o drivers/dsp/syslink/procmgr/proc4430/syslink_proc4430.o drivers/dsp/syslink/procmgr/proc4430/proc4430.o drivers/dsp/syslink/procmgr/proc4430/proc4430_drv.o 

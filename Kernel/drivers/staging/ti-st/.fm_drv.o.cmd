@@ -1,0 +1,1 @@
+cmd_drivers/staging/ti-st/fm_drv.o := /home/user/Kernel/tcc/bin/arm-none-eabi-ld -EL    -r -o drivers/staging/ti-st/fm_drv.o drivers/staging/ti-st/fmdrv_core.o drivers/staging/ti-st/fmdrv_v4l2.o drivers/staging/ti-st/fmdrv_st.o drivers/staging/ti-st/fmdrv_mixer.o drivers/staging/ti-st/fmdrv_chr.o 

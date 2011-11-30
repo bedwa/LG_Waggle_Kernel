@@ -1,0 +1,1 @@
+cmd_drivers/media/video/tiler/tiler_omap.o := /home/user/Kernel/tcc/bin/arm-none-eabi-ld -EL    -r -o drivers/media/video/tiler/tiler_omap.o drivers/media/video/tiler/tiler.o drivers/media/video/tiler/tiler_pack.o drivers/media/video/tiler/tiler_rot.o 

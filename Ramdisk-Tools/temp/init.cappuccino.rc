@@ -1,0 +1,12 @@
+
+# device/lge/cappuccino/packages/apps/OSP/lgosp-android/init.lgosp.rc
+#ANDY_PORTING OSP [woongchang.kim@lge.com 101027]
+service lgospd-hid /system/bin/lgospd-hid
+    user root
+    group system
+    oneshot
+
+service lgospd /system/bin/lgospd
+    user system
+    group system graphics diag radio
+#ANDY_END

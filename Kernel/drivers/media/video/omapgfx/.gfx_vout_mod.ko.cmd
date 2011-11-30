@@ -1,0 +1,1 @@
+cmd_drivers/media/video/omapgfx/gfx_vout_mod.ko := /home/user/Kernel/tcc/bin/arm-none-eabi-ld -EL -r  -T /home/user/Kernel/LG_Waggle_Kernel/scripts/module-common.lds --build-id -o drivers/media/video/omapgfx/gfx_vout_mod.ko drivers/media/video/omapgfx/gfx_vout_mod.o drivers/media/video/omapgfx/gfx_vout_mod.mod.o

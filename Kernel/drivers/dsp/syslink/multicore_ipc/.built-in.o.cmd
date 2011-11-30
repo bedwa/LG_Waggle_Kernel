@@ -1,0 +1,1 @@
+cmd_drivers/dsp/syslink/multicore_ipc/built-in.o :=  /home/user/Kernel/tcc/bin/arm-none-eabi-ld -EL    -r -o drivers/dsp/syslink/multicore_ipc/built-in.o drivers/dsp/syslink/multicore_ipc/syslink_ipc.o drivers/dsp/syslink/multicore_ipc/syslink_platform.o 

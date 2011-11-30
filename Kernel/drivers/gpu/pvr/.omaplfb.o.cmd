@@ -1,0 +1,1 @@
+cmd_drivers/gpu/pvr/omaplfb.o := /home/user/Kernel/tcc/bin/arm-none-eabi-ld -EL    -r -o drivers/gpu/pvr/omaplfb.o drivers/gpu/pvr/omaplfb/omaplfb_displayclass.o drivers/gpu/pvr/omaplfb/omaplfb_linux.o 

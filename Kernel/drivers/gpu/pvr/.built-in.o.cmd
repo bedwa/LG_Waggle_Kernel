@@ -1,0 +1,1 @@
+cmd_drivers/gpu/pvr/built-in.o :=  /home/user/Kernel/tcc/bin/arm-none-eabi-ld -EL    -r -o drivers/gpu/pvr/built-in.o drivers/gpu/pvr/pvr_common.o drivers/gpu/pvr/sgx.o drivers/gpu/pvr/omaplfb.o drivers/gpu/pvr/pvr540.o 

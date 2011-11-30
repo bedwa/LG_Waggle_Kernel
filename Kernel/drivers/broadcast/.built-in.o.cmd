@@ -1,0 +1,1 @@
+cmd_drivers/broadcast/built-in.o :=  /home/user/Kernel/tcc/bin/arm-none-eabi-ld -EL    -r -o drivers/broadcast/built-in.o drivers/broadcast/broadcast_tdmb_drv_if.o drivers/broadcast/fc8050/built-in.o 

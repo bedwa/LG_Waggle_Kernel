@@ -1,0 +1,59 @@
+on init
+
+
+export PATH /sbin
+
+# setup the global environment
+    export PATH /sbin:/data/data/com.lge.omadmclient/files/
+    export ANDROID_ROOT /system
+    export ANDROID_DATA /data
+    export EXTERNAL_STORAGE /sdcard
+
+    symlink /system/etc /etc
+
+    mkdir /sdcard
+    mkdir /system
+    mkdir /data
+    mkdir /data/data
+    mkdir /data/data/com.lge.omadmclient
+    mkdir /data/data/com.lge.omadmclient/files
+    mkdir /dev/fb0
+
+    mkdir /cache
+    mount /tmp /tmp tmpfs
+
+    #mount rootfs rootfs / rw remount
+
+    mount ext3 /dev/block/mmcblk0p7 /system rw
+
+    mount ext3 /dev/block/mmcblk0p8 /data nosuid nodev
+
+    chown system system /data
+    chmod 0771 /data
+    
+    
+    chmod 0777	/data/data
+    chmod 0777	/data/data/com.lge.omadmclient
+    chmod 0777	/data/data/com.lge.omadmclient/files
+    chmod 0777	/data/data/com.lge.omadmclient/files/dlpkgfile
+    chmod 0777  /dev/fb0
+
+on boot
+
+    ifup lo
+    hostname localhost
+    domainname localdomain
+
+    class_start default
+
+
+#service recovery /sbin/recovery
+
+service adbd /sbin/adbd recovery
+
+on property:persist.service.adb.enable=1
+    start adbd
+
+on property:persist.service.adb.enable=0
+    stop adbd
+

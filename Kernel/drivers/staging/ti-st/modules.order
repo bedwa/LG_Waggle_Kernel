@@ -1,0 +1,3 @@
+kernel/drivers/staging/ti-st/st_drv.ko
+kernel/drivers/staging/ti-st/ti_hci_drv.ko
+kernel/drivers/staging/ti-st/fm_drv.ko

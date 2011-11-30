@@ -1,0 +1,1 @@
+cmd_drivers/staging/ti-st/st_drv.o := /home/user/Kernel/tcc/bin/arm-none-eabi-ld -EL    -r -o drivers/staging/ti-st/st_drv.o drivers/staging/ti-st/st_core.o drivers/staging/ti-st/st_kim.o drivers/staging/ti-st/st_ll.o 

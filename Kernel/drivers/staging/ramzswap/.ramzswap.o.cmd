@@ -1,0 +1,1 @@
+cmd_drivers/staging/ramzswap/ramzswap.o := /home/user/Kernel/tcc/bin/arm-none-eabi-ld -EL    -r -o drivers/staging/ramzswap/ramzswap.o drivers/staging/ramzswap/ramzswap_drv.o drivers/staging/ramzswap/xvmalloc.o 

@@ -1,0 +1,1 @@
+cmd_drivers/cosmo/misc/built-in.o :=  /home/user/Kernel/tcc/bin/arm-none-eabi-ld -EL    -r -o drivers/cosmo/misc/built-in.o drivers/cosmo/misc/leds-keypad.o drivers/cosmo/misc/apds9900.o drivers/cosmo/misc/lm3528_bl.o drivers/cosmo/misc/lm3559.o 

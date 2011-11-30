@@ -1,0 +1,1 @@
+cmd_drivers/dsp/syslink/procmgr/syslink_proc.o := /home/user/Kernel/tcc/bin/arm-none-eabi-ld -EL    -r -o drivers/dsp/syslink/procmgr/syslink_proc.o drivers/dsp/syslink/procmgr/processor.o drivers/dsp/syslink/procmgr/procmgr.o drivers/dsp/syslink/procmgr/procmgr_drv.o 

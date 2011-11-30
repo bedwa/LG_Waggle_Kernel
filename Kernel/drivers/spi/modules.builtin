@@ -1,0 +1,2 @@
+kernel/drivers/spi/omap2_mcspi.ko
+kernel/drivers/spi/ifx_n721_spi.ko

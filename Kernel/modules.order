@@ -1,0 +1,7 @@
+kernel/fs/cifs/cifs.ko
+kernel/crypto/pcbc.ko
+kernel/drivers/scsi/scsi_wait_scan.ko
+kernel/drivers/media/video/omapgfx/gfx_vout_mod.ko
+kernel/drivers/staging/ti-st/st_drv.ko
+kernel/drivers/staging/ti-st/ti_hci_drv.ko
+kernel/drivers/staging/ti-st/fm_drv.ko

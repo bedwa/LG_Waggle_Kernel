@@ -1,0 +1,2 @@
+kernel/drivers/power/power_supply.ko
+kernel/drivers/power/twl6030_bci_battery_ap_fuel.ko

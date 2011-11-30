@@ -1,0 +1,1 @@
+cmd_drivers/cosmo/built-in.o :=  /home/user/Kernel/tcc/bin/arm-none-eabi-ld -EL    -r -o drivers/cosmo/built-in.o drivers/cosmo/muic/built-in.o drivers/cosmo/charger/built-in.o drivers/cosmo/fuel_gauge/built-in.o drivers/cosmo/subpmic/built-in.o drivers/cosmo/rindrv/built-in.o drivers/cosmo/misc/built-in.o drivers/cosmo/mtc_eta/built-in.o 
