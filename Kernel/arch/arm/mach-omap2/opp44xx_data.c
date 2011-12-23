@@ -46,7 +46,7 @@ static struct clk *abe_clk, *sgx_clk, *fdif_clk, *hsi_clk;
 
 /* LGE_CHANGE_S [kundong.kim@lge.com] 2011-03-06, boot m3 with max clock */
 static bool bootup_m3_with_maxclcok =1;
-#define JET_FREQ 1200000000
+#define JET_FREQ 1300000000
 /* LGE_CHANGE_E [kundong.kim@lge.com] 2011-03-06, boot m3 with max clock */
 /*
  * Separate OPP table is needed for pre ES2.1 chips as emif cannot be scaled.
@@ -55,15 +55,15 @@ static bool bootup_m3_with_maxclcok =1;
  */
 static struct omap_opp_def __initdata omap44xx_pre_es2_1_opp_def_list[] = {
 	/* MPU OPP1 - OPP50 */
-	OMAP_OPP_DEF("mpu", true, 200000000, 930000),
+	OMAP_OPP_DEF("mpu", true, 300000000, 920000),
 	/* MPU OPP2 - OPP100 */
 	OMAP_OPP_DEF("mpu", true, 600000000, 1100000),
 	/* MPU OPP3 - OPP-Turbo */
-	OMAP_OPP_DEF("mpu", true, 800000000, 1260000),
+	OMAP_OPP_DEF("mpu", true, 800000000, 1250000),
 	/* MPU OPP4 - OPP-SB */
-	OMAP_OPP_DEF("mpu", true, 1008000000, 1350000),
+	OMAP_OPP_DEF("mpu", true, 1080000000, 1300000),
 	/* MPU OPP5 - OPP-JET */
-	OMAP_OPP_DEF("mpu", true, JET_FREQ, 1375000),
+	OMAP_OPP_DEF("mpu", true, JET_FREQ, 1350000),
 	/* IVA OPP1 - OPP50_98 */
 	OMAP_OPP_DEF("iva", true,  133000000, 928000),
 	/* IVA OPP1 - OPP50 */
@@ -97,9 +97,9 @@ static struct omap_opp_def __initdata omap44xx_pre_es2_1_opp_def_list[] = {
 	/* CAM FDIF OPP2 - OPP100 */
 	OMAP_OPP_DEF("fdif", true, 128000000, 1100000),
 	/* SGX OPP1 - OPP50 */
-	OMAP_OPP_DEF("gpu", true, 153600000, 930000),
+	OMAP_OPP_DEF("gpu", true, 180000000, 930000),
 	/* SGX OPP2 - OPP100 */
-	OMAP_OPP_DEF("gpu", true, 307200000, 1100000),
+	OMAP_OPP_DEF("gpu", true, 384000000, 1100000),
 	/* HSI OPP1 - OPP50 */
 	OMAP_OPP_DEF("hsi", true, 96000000, 930000),
 	/* HSI OPP2 - OPP100 */
@@ -110,15 +110,15 @@ static struct omap_opp_def __initdata omap44xx_pre_es2_1_opp_def_list[] = {
 
 static struct omap_opp_def __initdata omap44xx_opp_def_list[] = {
 	/* MPU OPP1 - OPP50 */
-	OMAP_OPP_DEF("mpu", true, 200000000, 930000),
+	OMAP_OPP_DEF("mpu", true, 300000000, 920000),
 	/* MPU OPP2 - OPP100 */
 	OMAP_OPP_DEF("mpu", true, 600000000, 1100000),
 	/* MPU OPP3 - OPP-Turbo */
-	OMAP_OPP_DEF("mpu", true, 800000000, 1260000),
+	OMAP_OPP_DEF("mpu", true, 800000000, 1250000),
 	/* MPU OPP4 - OPP-SB */
-	OMAP_OPP_DEF("mpu", true, 1008000000, 1350000),
+	OMAP_OPP_DEF("mpu", true, 1080000000, 1300000),
 	/* MPU OPP5 - OPP-JET */
-	OMAP_OPP_DEF("mpu", true, 1200000000, 1375000),
+	OMAP_OPP_DEF("mpu", true, 1300000000, 1350000),
 	/* IVA OPP1 - OPP50_98 */
 	OMAP_OPP_DEF("iva", true,  133000000, 928000),
 	/* IVA OPP1 - OPP50 */
@@ -160,9 +160,9 @@ static struct omap_opp_def __initdata omap44xx_opp_def_list[] = {
 	/* CAM FDIF OPP2 - OPP100 */
 	OMAP_OPP_DEF("fdif", true, 128000000, 1100000),
 	/* SGX OPP1 - OPP50 */
-	OMAP_OPP_DEF("gpu", true, 153600000, 950000),
+	OMAP_OPP_DEF("gpu", true, 200000000, 950000),
 	/* SGX OPP2 - OPP100 */
-	OMAP_OPP_DEF("gpu", true, 307200000, 1100000),
+	OMAP_OPP_DEF("gpu", true, 390000000, 1100000),
 	/* HSI OPP1 - OPP50 */
 	OMAP_OPP_DEF("hsi", true, 96000000, 950000),
 	/* HSI OPP2 - OPP100 */

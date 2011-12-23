@@ -1,4 +1,4 @@
-cmd_arch/arm/kernel/compat.o := /home/user/Kernel/tcc/bin/arm-none-eabi-gcc -Wp,-MD,arch/arm/kernel/.compat.o.d  -nostdinc -isystem /home/user/Kernel/tcc/bin/../lib/gcc/arm-none-eabi/4.4.1/include -I/home/user/Kernel/LG_Waggle_Kernel/arch/arm/include -Iinclude  -include include/generated/autoconf.h -D__KERNEL__ -mlittle-endian -Iarch/arm/mach-omap2/include -Iarch/arm/plat-omap/include -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -fno-delete-null-pointer-checks -Os -marm -fno-omit-frame-pointer -mapcs -mno-sched-prolog -mabi=aapcs-linux -mno-thumb-interwork -D__LINUX_ARM_ARCH__=7 -march=armv7-a -msoft-float -Uarm -Wframe-larger-than=1024 -fno-stack-protector -fno-omit-frame-pointer -fno-optimize-sibling-calls -g -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fconserve-stack -DTARGET_CARRIER_ -DTARGET_COUNTRY_   -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(compat)"  -D"KBUILD_MODNAME=KBUILD_STR(compat)"  -c -o arch/arm/kernel/compat.o arch/arm/kernel/compat.c
+cmd_arch/arm/kernel/compat.o := /home/user/Kernel/tcc/bin/arm-none-eabi-gcc -Wp,-MD,arch/arm/kernel/.compat.o.d  -nostdinc -isystem /home/user/Kernel/tcc/bin/../lib/gcc/arm-none-eabi/4.4.1/include -I/home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include -Iinclude  -include include/generated/autoconf.h -D__KERNEL__ -mlittle-endian -Iarch/arm/mach-omap2/include -Iarch/arm/plat-omap/include -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -fno-delete-null-pointer-checks -Os -marm -fno-omit-frame-pointer -mapcs -mno-sched-prolog -mabi=aapcs-linux -mno-thumb-interwork -D__LINUX_ARM_ARCH__=7 -march=armv7-a -msoft-float -Uarm -Wframe-larger-than=1024 -fno-stack-protector -fno-omit-frame-pointer -fno-optimize-sibling-calls -g -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fconserve-stack -DTARGET_CARRIER_ -DTARGET_COUNTRY_   -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(compat)"  -D"KBUILD_MODNAME=KBUILD_STR(compat)"  -c -o arch/arm/kernel/compat.o arch/arm/kernel/compat.c
 
 deps_arch/arm/kernel/compat.o := \
   arch/arm/kernel/compat.c \
@@ -11,9 +11,9 @@ deps_arch/arm/kernel/compat.o := \
     $(wildcard include/config/lbdaf.h) \
     $(wildcard include/config/phys/addr/t/64bit.h) \
     $(wildcard include/config/64bit.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/types.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/types.h \
   include/asm-generic/int-ll64.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/bitsperlong.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/bitsperlong.h \
   include/asm-generic/bitsperlong.h \
   include/linux/posix_types.h \
   include/linux/stddef.h \
@@ -26,7 +26,7 @@ deps_arch/arm/kernel/compat.o := \
     $(wildcard include/config/arch/supports/optimized/inlining.h) \
     $(wildcard include/config/optimize/inlining.h) \
   include/linux/compiler-gcc4.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/posix_types.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/posix_types.h \
   include/linux/kernel.h \
     $(wildcard include/config/preempt/voluntary.h) \
     $(wildcard include/config/debug/spinlock/sleep.h) \
@@ -39,14 +39,14 @@ deps_arch/arm/kernel/compat.o := \
     $(wildcard include/config/ftrace/mcount/record.h) \
   /home/user/Kernel/tcc/bin/../lib/gcc/arm-none-eabi/4.4.1/include/stdarg.h \
   include/linux/linkage.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/linkage.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/linkage.h \
   include/linux/bitops.h \
     $(wildcard include/config/generic/find/first/bit.h) \
     $(wildcard include/config/generic/find/last/bit.h) \
     $(wildcard include/config/generic/find/next/bit.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/bitops.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/bitops.h \
     $(wildcard include/config/smp.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/system.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/system.h \
     $(wildcard include/config/cpu/xsc3.h) \
     $(wildcard include/config/cpu/fa526.h) \
     $(wildcard include/config/arch/has/barriers.h) \
@@ -60,12 +60,12 @@ deps_arch/arm/kernel/compat.o := \
     $(wildcard include/config/preempt/tracer.h) \
     $(wildcard include/config/trace/irqflags/support.h) \
   include/linux/typecheck.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/irqflags.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/ptrace.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/irqflags.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/ptrace.h \
     $(wildcard include/config/cpu/endian/be8.h) \
     $(wildcard include/config/arm/thumb.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/hwcap.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/outercache.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/hwcap.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/outercache.h \
     $(wildcard include/config/outer/cache/sync.h) \
     $(wildcard include/config/outer/cache.h) \
   include/asm-generic/cmpxchg-local.h \
@@ -80,12 +80,12 @@ deps_arch/arm/kernel/compat.o := \
     $(wildcard include/config/arch/has/ilog2/u32.h) \
     $(wildcard include/config/arch/has/ilog2/u64.h) \
   include/linux/dynamic_debug.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/byteorder.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/byteorder.h \
   include/linux/byteorder/little_endian.h \
   include/linux/swab.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/swab.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/swab.h \
   include/linux/byteorder/generic.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/bug.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/bug.h \
     $(wildcard include/config/bug.h) \
     $(wildcard include/config/debug/bugverbose.h) \
   include/asm-generic/bug.h \
@@ -93,13 +93,13 @@ deps_arch/arm/kernel/compat.o := \
     $(wildcard include/config/generic/bug/relative/pointers.h) \
   include/linux/string.h \
     $(wildcard include/config/binary/printf.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/string.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/string.h \
   include/linux/init.h \
     $(wildcard include/config/modules.h) \
     $(wildcard include/config/hotplug.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/setup.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/setup.h \
     $(wildcard include/config/arch/lh7a40x.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/mach-types.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/mach-types.h \
   include/generated/mach-types.h \
     $(wildcard include/config/arch/ebsa110.h) \
     $(wildcard include/config/arch/rpc.h) \
@@ -3034,7 +3034,7 @@ deps_arch/arm/kernel/compat.o := \
     $(wildcard include/config/mach/flexibity.h) \
     $(wildcard include/config/mach/wlan/computer.h) \
     $(wildcard include/config/mach/lge/cosmopolitan.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/page.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/page.h \
     $(wildcard include/config/mmu.h) \
     $(wildcard include/config/cpu/copy/v3.h) \
     $(wildcard include/config/cpu/copy/v4wt.h) \
@@ -3044,7 +3044,7 @@ deps_arch/arm/kernel/compat.o := \
     $(wildcard include/config/cpu/xscale.h) \
     $(wildcard include/config/cpu/copy/v6.h) \
     $(wildcard include/config/sparsemem.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/glue.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/glue.h \
     $(wildcard include/config/cpu/arm610.h) \
     $(wildcard include/config/cpu/arm710.h) \
     $(wildcard include/config/cpu/abrt/lv4t.h) \
@@ -3057,7 +3057,7 @@ deps_arch/arm/kernel/compat.o := \
     $(wildcard include/config/cpu/pabrt/legacy.h) \
     $(wildcard include/config/cpu/pabrt/v6.h) \
     $(wildcard include/config/cpu/pabrt/v7.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/memory.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/memory.h \
     $(wildcard include/config/page/offset.h) \
     $(wildcard include/config/thumb2/kernel.h) \
     $(wildcard include/config/highmem.h) \
@@ -3071,12 +3071,12 @@ deps_arch/arm/kernel/compat.o := \
     $(wildcard include/config/arch/omap1.h) \
     $(wildcard include/config/arch/omap15xx.h) \
     $(wildcard include/config/fb/omap/consistent/dma/size.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/sizes.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/sizes.h \
   include/asm-generic/memory_model.h \
     $(wildcard include/config/flatmem.h) \
     $(wildcard include/config/sparsemem/vmemmap.h) \
   include/asm-generic/getorder.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/mach/arch.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/mach/arch.h \
   arch/arm/kernel/compat.h \
 
 arch/arm/kernel/compat.o: $(deps_arch/arm/kernel/compat.o)

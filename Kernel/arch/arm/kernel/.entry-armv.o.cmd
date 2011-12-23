@@ -1,4 +1,4 @@
-cmd_arch/arm/kernel/entry-armv.o := /home/user/Kernel/tcc/bin/arm-none-eabi-gcc -Wp,-MD,arch/arm/kernel/.entry-armv.o.d  -nostdinc -isystem /home/user/Kernel/tcc/bin/../lib/gcc/arm-none-eabi/4.4.1/include -I/home/user/Kernel/LG_Waggle_Kernel/arch/arm/include -Iinclude  -include include/generated/autoconf.h -D__KERNEL__ -mlittle-endian -Iarch/arm/mach-omap2/include -Iarch/arm/plat-omap/include -D__ASSEMBLY__ -mabi=aapcs-linux -mno-thumb-interwork  -D__LINUX_ARM_ARCH__=7 -march=armv7-a  -include asm/unified.h -msoft-float -gdwarf-2       -c -o arch/arm/kernel/entry-armv.o arch/arm/kernel/entry-armv.S
+cmd_arch/arm/kernel/entry-armv.o := /home/user/Kernel/tcc/bin/arm-none-eabi-gcc -Wp,-MD,arch/arm/kernel/.entry-armv.o.d  -nostdinc -isystem /home/user/Kernel/tcc/bin/../lib/gcc/arm-none-eabi/4.4.1/include -I/home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include -Iinclude  -include include/generated/autoconf.h -D__KERNEL__ -mlittle-endian -Iarch/arm/mach-omap2/include -Iarch/arm/plat-omap/include -D__ASSEMBLY__ -mabi=aapcs-linux -mno-thumb-interwork  -D__LINUX_ARM_ARCH__=7 -march=armv7-a  -include asm/unified.h -msoft-float -gdwarf-2       -c -o arch/arm/kernel/entry-armv.o arch/arm/kernel/entry-armv.S
 
 deps_arch/arm/kernel/entry-armv.o := \
   arch/arm/kernel/entry-armv.S \
@@ -22,9 +22,9 @@ deps_arch/arm/kernel/entry-armv.o := \
     $(wildcard include/config/has/tls/reg.h) \
     $(wildcard include/config/tls/reg/emul.h) \
     $(wildcard include/config/arm/thumb.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/unified.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/unified.h \
     $(wildcard include/config/arm/asm/unified.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/memory.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/memory.h \
     $(wildcard include/config/page/offset.h) \
     $(wildcard include/config/highmem.h) \
     $(wildcard include/config/dram/size.h) \
@@ -42,12 +42,12 @@ deps_arch/arm/kernel/entry-armv.o := \
     $(wildcard include/config/arch/omap1.h) \
     $(wildcard include/config/arch/omap15xx.h) \
     $(wildcard include/config/fb/omap/consistent/dma/size.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/sizes.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/sizes.h \
   include/asm-generic/memory_model.h \
     $(wildcard include/config/flatmem.h) \
     $(wildcard include/config/sparsemem/vmemmap.h) \
     $(wildcard include/config/sparsemem.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/glue.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/glue.h \
     $(wildcard include/config/cpu/abrt/lv4t.h) \
     $(wildcard include/config/cpu/abrt/ev4.h) \
     $(wildcard include/config/cpu/abrt/ev4t.h) \
@@ -58,9 +58,9 @@ deps_arch/arm/kernel/entry-armv.o := \
     $(wildcard include/config/cpu/pabrt/legacy.h) \
     $(wildcard include/config/cpu/pabrt/v6.h) \
     $(wildcard include/config/cpu/pabrt/v7.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/vfpmacros.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/vfpmacros.h \
     $(wildcard include/config/vfpv3.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/vfp.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/vfp.h \
   arch/arm/mach-omap2/include/mach/entry-macro.S \
     $(wildcard include/config/arch/omap2.h) \
     $(wildcard include/config/arch/omap3.h) \
@@ -92,16 +92,16 @@ deps_arch/arm/kernel/entry-armv.o := \
     $(wildcard include/config/twl6040/codec.h) \
     $(wildcard include/config/fiq.h) \
   arch/arm/plat-omap/include/plat/irqs-44xx.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/hardware/gic.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/hardware/gic.h \
   arch/arm/plat-omap/include/plat/multi.h \
     $(wildcard include/config/arch/omap730.h) \
     $(wildcard include/config/arch/omap850.h) \
     $(wildcard include/config/arch/omap16xx.h) \
     $(wildcard include/config/arch/omap2plus.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/thread_notify.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/unwind.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/thread_notify.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/unwind.h \
     $(wildcard include/config/arm/unwind.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/unistd.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/unistd.h \
     $(wildcard include/config/oabi/compat.h) \
   arch/arm/kernel/entry-header.S \
     $(wildcard include/config/frame/pointer.h) \
@@ -109,21 +109,21 @@ deps_arch/arm/kernel/entry-armv.o := \
     $(wildcard include/config/cpu/32v6k.h) \
     $(wildcard include/config/cpu/v6.h) \
   include/linux/linkage.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/linkage.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/assembler.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/linkage.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/assembler.h \
     $(wildcard include/config/cpu/feroceon.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/ptrace.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/hwcap.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/domain.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/ptrace.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/hwcap.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/domain.h \
     $(wildcard include/config/io/36.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/asm-offsets.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/asm-offsets.h \
   include/generated/asm-offsets.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/errno.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/errno.h \
   include/asm-generic/errno.h \
   include/asm-generic/errno-base.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/thread_info.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/thread_info.h \
     $(wildcard include/config/arm/thumbee.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/fpstate.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/fpstate.h \
 
 arch/arm/kernel/entry-armv.o: $(deps_arch/arm/kernel/entry-armv.o)
 

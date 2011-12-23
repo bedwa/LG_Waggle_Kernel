@@ -1,4 +1,4 @@
-cmd_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := /home/user/Kernel/tcc/bin/arm-none-eabi-gcc -Wp,-MD,arch/arm/mach-omap2/.omap4-mpuss-lowpower.o.d  -nostdinc -isystem /home/user/Kernel/tcc/bin/../lib/gcc/arm-none-eabi/4.4.1/include -I/home/user/Kernel/LG_Waggle_Kernel/arch/arm/include -Iinclude  -include include/generated/autoconf.h -D__KERNEL__ -mlittle-endian -Iarch/arm/mach-omap2/include -Iarch/arm/plat-omap/include -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -fno-delete-null-pointer-checks -Os -marm -fno-omit-frame-pointer -mapcs -mno-sched-prolog -mabi=aapcs-linux -mno-thumb-interwork -D__LINUX_ARM_ARCH__=7 -march=armv7-a -msoft-float -Uarm -Wframe-larger-than=1024 -fno-stack-protector -fno-omit-frame-pointer -fno-optimize-sibling-calls -g -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fconserve-stack -DTARGET_CARRIER_ -DTARGET_COUNTRY_   -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(omap4_mpuss_lowpower)"  -D"KBUILD_MODNAME=KBUILD_STR(omap4_mpuss_lowpower)"  -c -o arch/arm/mach-omap2/omap4-mpuss-lowpower.o arch/arm/mach-omap2/omap4-mpuss-lowpower.c
+cmd_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := /home/user/Kernel/tcc/bin/arm-none-eabi-gcc -Wp,-MD,arch/arm/mach-omap2/.omap4-mpuss-lowpower.o.d  -nostdinc -isystem /home/user/Kernel/tcc/bin/../lib/gcc/arm-none-eabi/4.4.1/include -I/home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include -Iinclude  -include include/generated/autoconf.h -D__KERNEL__ -mlittle-endian -Iarch/arm/mach-omap2/include -Iarch/arm/plat-omap/include -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -fno-delete-null-pointer-checks -Os -marm -fno-omit-frame-pointer -mapcs -mno-sched-prolog -mabi=aapcs-linux -mno-thumb-interwork -D__LINUX_ARM_ARCH__=7 -march=armv7-a -msoft-float -Uarm -Wframe-larger-than=1024 -fno-stack-protector -fno-omit-frame-pointer -fno-optimize-sibling-calls -g -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fconserve-stack -DTARGET_CARRIER_ -DTARGET_COUNTRY_   -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(omap4_mpuss_lowpower)"  -D"KBUILD_MODNAME=KBUILD_STR(omap4_mpuss_lowpower)"  -c -o arch/arm/mach-omap2/omap4-mpuss-lowpower.o arch/arm/mach-omap2/omap4-mpuss-lowpower.c
 
 deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
   arch/arm/mach-omap2/omap4-mpuss-lowpower.c \
@@ -26,24 +26,24 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
     $(wildcard include/config/arch/supports/optimized/inlining.h) \
     $(wildcard include/config/optimize/inlining.h) \
   include/linux/compiler-gcc4.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/linkage.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/linkage.h \
   include/linux/stddef.h \
   include/linux/types.h \
     $(wildcard include/config/uid16.h) \
     $(wildcard include/config/phys/addr/t/64bit.h) \
     $(wildcard include/config/64bit.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/types.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/types.h \
   include/asm-generic/int-ll64.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/bitsperlong.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/bitsperlong.h \
   include/asm-generic/bitsperlong.h \
   include/linux/posix_types.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/posix_types.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/posix_types.h \
   include/linux/bitops.h \
     $(wildcard include/config/generic/find/first/bit.h) \
     $(wildcard include/config/generic/find/last/bit.h) \
     $(wildcard include/config/generic/find/next/bit.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/bitops.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/system.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/bitops.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/system.h \
     $(wildcard include/config/cpu/xsc3.h) \
     $(wildcard include/config/cpu/fa526.h) \
     $(wildcard include/config/arch/has/barriers.h) \
@@ -57,12 +57,12 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
     $(wildcard include/config/preempt/tracer.h) \
     $(wildcard include/config/trace/irqflags/support.h) \
   include/linux/typecheck.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/irqflags.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/ptrace.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/irqflags.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/ptrace.h \
     $(wildcard include/config/cpu/endian/be8.h) \
     $(wildcard include/config/arm/thumb.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/hwcap.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/outercache.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/hwcap.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/outercache.h \
     $(wildcard include/config/outer/cache/sync.h) \
     $(wildcard include/config/outer/cache.h) \
   include/asm-generic/cmpxchg-local.h \
@@ -77,12 +77,12 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
     $(wildcard include/config/arch/has/ilog2/u32.h) \
     $(wildcard include/config/arch/has/ilog2/u64.h) \
   include/linux/dynamic_debug.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/byteorder.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/byteorder.h \
   include/linux/byteorder/little_endian.h \
   include/linux/swab.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/swab.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/swab.h \
   include/linux/byteorder/generic.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/bug.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/bug.h \
     $(wildcard include/config/bug.h) \
     $(wildcard include/config/debug/bugverbose.h) \
   include/asm-generic/bug.h \
@@ -91,8 +91,8 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
   include/linux/io.h \
     $(wildcard include/config/mmu.h) \
     $(wildcard include/config/has/ioport.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/io.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/memory.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/io.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/memory.h \
     $(wildcard include/config/page/offset.h) \
     $(wildcard include/config/thumb2/kernel.h) \
     $(wildcard include/config/highmem.h) \
@@ -106,7 +106,7 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
     $(wildcard include/config/arch/omap1.h) \
     $(wildcard include/config/arch/omap15xx.h) \
     $(wildcard include/config/fb/omap/consistent/dma/size.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/sizes.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/sizes.h \
   include/asm-generic/memory_model.h \
     $(wildcard include/config/flatmem.h) \
     $(wildcard include/config/sparsemem/vmemmap.h) \
@@ -140,7 +140,7 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
   arch/arm/plat-omap/include/plat/omap24xx.h \
   arch/arm/plat-omap/include/plat/omap34xx.h \
   arch/arm/plat-omap/include/plat/omap44xx.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/page.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/page.h \
     $(wildcard include/config/cpu/copy/v3.h) \
     $(wildcard include/config/cpu/copy/v4wt.h) \
     $(wildcard include/config/cpu/copy/v4wb.h) \
@@ -148,7 +148,7 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
     $(wildcard include/config/cpu/copy/fa.h) \
     $(wildcard include/config/cpu/xscale.h) \
     $(wildcard include/config/cpu/copy/v6.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/glue.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/glue.h \
     $(wildcard include/config/cpu/arm610.h) \
     $(wildcard include/config/cpu/arm710.h) \
     $(wildcard include/config/cpu/abrt/lv4t.h) \
@@ -163,7 +163,7 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
     $(wildcard include/config/cpu/pabrt/v7.h) \
   include/asm-generic/getorder.h \
   include/linux/errno.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/errno.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/errno.h \
   include/asm-generic/errno.h \
   include/asm-generic/errno-base.h \
   include/linux/smp.h \
@@ -174,8 +174,8 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
   include/linux/poison.h \
     $(wildcard include/config/illegal/pointer/value.h) \
   include/linux/prefetch.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/processor.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/cache.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/processor.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/cache.h \
     $(wildcard include/config/arm/l1/cache/shift.h) \
     $(wildcard include/config/aeabi.h) \
   include/linux/cpumask.h \
@@ -189,24 +189,24 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
   include/linux/bitmap.h \
   include/linux/string.h \
     $(wildcard include/config/binary/printf.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/string.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/string.h \
   include/linux/preempt.h \
     $(wildcard include/config/preempt.h) \
     $(wildcard include/config/preempt/notifiers.h) \
   include/linux/thread_info.h \
     $(wildcard include/config/compat.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/thread_info.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/thread_info.h \
     $(wildcard include/config/arm/thumbee.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/fpstate.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/fpstate.h \
     $(wildcard include/config/vfpv3.h) \
     $(wildcard include/config/iwmmxt.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/domain.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/domain.h \
     $(wildcard include/config/io/36.h) \
     $(wildcard include/config/cpu/use/domains.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/smp.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/smp.h \
   arch/arm/mach-omap2/include/mach/smp.h \
   arch/arm/plat-omap/include/plat/smp.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/hardware/gic.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/hardware/gic.h \
   include/linux/dma-mapping.h \
     $(wildcard include/config/has/dma.h) \
     $(wildcard include/config/have/dma/attrs.h) \
@@ -225,7 +225,7 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
     $(wildcard include/config/lock/stat.h) \
     $(wildcard include/config/generic/hardirqs.h) \
     $(wildcard include/config/prove/rcu.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/atomic.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/atomic.h \
     $(wildcard include/config/generic/atomic64.h) \
   include/asm-generic/atomic-long.h \
   include/linux/spinlock.h \
@@ -234,9 +234,9 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
   include/linux/stringify.h \
   include/linux/bottom_half.h \
   include/linux/spinlock_types.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/spinlock_types.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/spinlock_types.h \
   include/linux/rwlock_types.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/spinlock.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/spinlock.h \
   include/linux/rwlock.h \
   include/linux/spinlock_api_smp.h \
     $(wildcard include/config/inline/spin/lock.h) \
@@ -270,7 +270,7 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
     $(wildcard include/config/inline/write/unlock/irqrestore.h) \
   include/linux/kref.h \
   include/linux/wait.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/current.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/current.h \
   include/linux/klist.h \
   include/linux/module.h \
     $(wildcard include/config/symbol/prefix.h) \
@@ -282,14 +282,14 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
     $(wildcard include/config/module/unload.h) \
     $(wildcard include/config/constructors.h) \
   include/linux/stat.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/stat.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/stat.h \
   include/linux/time.h \
     $(wildcard include/config/arch/uses/gettimeoffset.h) \
   include/linux/cache.h \
     $(wildcard include/config/arch/has/cache/line/size.h) \
   include/linux/seqlock.h \
   include/linux/math64.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/div64.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/div64.h \
   include/linux/kmod.h \
   include/linux/gfp.h \
     $(wildcard include/config/kmemcheck.h) \
@@ -338,11 +338,11 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
     $(wildcard include/config/need/per/cpu/page/first/chunk.h) \
     $(wildcard include/config/have/setup/per/cpu/area.h) \
   include/linux/pfn.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/percpu.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/percpu.h \
   include/asm-generic/percpu.h \
   include/linux/percpu-defs.h \
     $(wildcard include/config/debug/force/weak/per/cpu.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/topology.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/topology.h \
   include/asm-generic/topology.h \
   include/linux/mmdebug.h \
     $(wildcard include/config/debug/virtual.h) \
@@ -356,9 +356,9 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
   include/linux/jiffies.h \
   include/linux/timex.h \
   include/linux/param.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/param.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/param.h \
     $(wildcard include/config/hz.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/timex.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/timex.h \
   arch/arm/mach-omap2/include/mach/timex.h \
   arch/arm/plat-omap/include/plat/timex.h \
     $(wildcard include/config/omap/32k/timer.h) \
@@ -368,8 +368,8 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
     $(wildcard include/config/debug/objects/free.h) \
   include/linux/elf.h \
   include/linux/elf-em.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/elf.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/user.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/elf.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/user.h \
   include/linux/moduleparam.h \
     $(wildcard include/config/alpha.h) \
     $(wildcard include/config/ia64.h) \
@@ -383,7 +383,7 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
   include/linux/completion.h \
   include/linux/rcutree.h \
     $(wildcard include/config/no/hz.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/module.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/module.h \
     $(wildcard include/config/arm/unwind.h) \
   include/trace/events/module.h \
   include/trace/define_trace.h \
@@ -391,7 +391,7 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
     $(wildcard include/config/pm/sleep.h) \
     $(wildcard include/config/pm/runtime.h) \
     $(wildcard include/config/pm/ops.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/device.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/device.h \
     $(wildcard include/config/dmabounce.h) \
   include/linux/pm_wakeup.h \
     $(wildcard include/config/pm.h) \
@@ -400,7 +400,7 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
   include/linux/bug.h \
   include/linux/scatterlist.h \
     $(wildcard include/config/debug/sg.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/scatterlist.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/scatterlist.h \
   include/asm-generic/scatterlist.h \
     $(wildcard include/config/need/sg/dma/length.h) \
   include/linux/mm.h \
@@ -421,17 +421,17 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
     $(wildcard include/config/mm/owner.h) \
     $(wildcard include/config/mmu/notifier.h) \
   include/linux/auxvec.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/auxvec.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/auxvec.h \
   include/linux/page-debug-flags.h \
     $(wildcard include/config/page/poisoning.h) \
     $(wildcard include/config/page/debug/something/else.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/mmu.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/mmu.h \
     $(wildcard include/config/cpu/has/asid.h) \
   include/linux/range.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/pgtable.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/pgtable.h \
     $(wildcard include/config/highpte.h) \
   include/asm-generic/4level-fixup.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/proc-fns.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/proc-fns.h \
     $(wildcard include/config/cpu/arm7tdmi.h) \
     $(wildcard include/config/cpu/arm720t.h) \
     $(wildcard include/config/cpu/arm740t.h) \
@@ -450,9 +450,9 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
     $(wildcard include/config/cpu/feroceon.h) \
     $(wildcard include/config/cpu/v6.h) \
     $(wildcard include/config/cpu/v7.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/cpu-single.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/cpu-single.h \
   arch/arm/mach-omap2/include/mach/vmalloc.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/pgtable-hwdef.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/pgtable-hwdef.h \
   include/asm-generic/pgtable.h \
   include/linux/page-flags.h \
     $(wildcard include/config/pageflags/extended.h) \
@@ -462,10 +462,10 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
     $(wildcard include/config/s390.h) \
   include/linux/vmstat.h \
     $(wildcard include/config/vm/event/counters.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/dma-mapping.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/dma-mapping.h \
   include/asm-generic/dma-coherent.h \
     $(wildcard include/config/have/generic/dma/coherent.h) \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/tlbflush.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/tlbflush.h \
     $(wildcard include/config/cpu/tlb/v3.h) \
     $(wildcard include/config/cpu/tlb/v4wt.h) \
     $(wildcard include/config/cpu/tlb/fa.h) \
@@ -509,17 +509,17 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
     $(wildcard include/config/debug/stack/usage.h) \
     $(wildcard include/config/cgroup/sched.h) \
   include/linux/capability.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/cputime.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/cputime.h \
   include/asm-generic/cputime.h \
   include/linux/sem.h \
   include/linux/ipc.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/ipcbuf.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/sembuf.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/ipcbuf.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/sembuf.h \
   include/linux/signal.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/signal.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/signal.h \
   include/asm-generic/signal-defs.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/sigcontext.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/siginfo.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/sigcontext.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/siginfo.h \
   include/asm-generic/siginfo.h \
   include/linux/path.h \
   include/linux/pid.h \
@@ -533,7 +533,7 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
   include/linux/plist.h \
     $(wildcard include/config/debug/pi/list.h) \
   include/linux/resource.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/resource.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/resource.h \
   include/asm-generic/resource.h \
   include/linux/hrtimer.h \
     $(wildcard include/config/high/res/timers.h) \
@@ -550,8 +550,8 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
   include/linux/aio.h \
   include/linux/aio_abi.h \
   include/linux/uio.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/smp_scu.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/irq.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/smp_scu.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/irq.h \
   arch/arm/mach-omap2/include/mach/irqs.h \
   arch/arm/plat-omap/include/plat/irqs.h \
     $(wildcard include/config/mach/omap/innovator.h) \
@@ -560,7 +560,7 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
     $(wildcard include/config/twl6040/codec.h) \
     $(wildcard include/config/fiq.h) \
   arch/arm/plat-omap/include/plat/irqs-44xx.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/smp_twd.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/smp_twd.h \
   arch/arm/plat-omap/include/plat/powerdomain.h \
     $(wildcard include/config/pm/debug.h) \
   arch/arm/plat-omap/include/plat/clockdomain.h \
@@ -580,7 +580,7 @@ deps_arch/arm/mach-omap2/omap4-mpuss-lowpower.o := \
     $(wildcard include/config/gpio/sysfs.h) \
     $(wildcard include/config/have/gpio/lib.h) \
   include/linux/delay.h \
-  /home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/delay.h \
+  /home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/delay.h \
   arch/arm/mach-omap2/pm.h \
     $(wildcard include/config/cpu/idle.h) \
   arch/arm/mach-omap2/cm.h \

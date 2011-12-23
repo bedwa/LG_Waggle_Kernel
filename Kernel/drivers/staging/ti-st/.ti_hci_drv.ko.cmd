@@ -1,1 +1,1 @@
-cmd_drivers/staging/ti-st/ti_hci_drv.ko := /home/user/Kernel/tcc/bin/arm-none-eabi-ld -EL -r  -T /home/user/Kernel/LG_Waggle_Kernel/scripts/module-common.lds --build-id -o drivers/staging/ti-st/ti_hci_drv.ko drivers/staging/ti-st/ti_hci_drv.o drivers/staging/ti-st/ti_hci_drv.mod.o
+cmd_drivers/staging/ti-st/ti_hci_drv.ko := /home/user/Kernel/tcc/bin/arm-none-eabi-ld -EL -r  -T /home/user/Kernel/LG_Waggle_Kernel/Kernel/scripts/module-common.lds --build-id -o drivers/staging/ti-st/ti_hci_drv.ko drivers/staging/ti-st/ti_hci_drv.o drivers/staging/ti-st/ti_hci_drv.mod.o

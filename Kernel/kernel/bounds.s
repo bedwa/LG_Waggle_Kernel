@@ -13,7 +13,7 @@
 @	compiled by GNU C version 4.3.2, GMP version 4.3.1, MPFR version 2.4.2.
 @ GGC heuristics: --param ggc-min-expand=97 --param ggc-min-heapsize=126692
 @ options passed:  -nostdinc
-@ -I/home/user/Kernel/LG_Waggle_Kernel/arch/arm/include -Iinclude
+@ -I/home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include -Iinclude
 @ -Iarch/arm/mach-omap2/include -Iarch/arm/plat-omap/include -iprefix
 @ /home/user/Kernel/tcc/bin/../lib/gcc/arm-none-eabi/4.4.1/ -isysroot
 @ /home/user/Kernel/tcc/bin/../arm-none-eabi -D__USES_INITFINI__
@@ -531,8 +531,8 @@ foo:
 	.ascii	"PG_writeback\000"
 .LASF48:
 	.ascii	"GNU C 4.4.1\000"
+.LASF50:
+	.ascii	"/home/user/Kernel/LG_Waggle_Kernel/Kernel\000"
 .LASF38:
 	.ascii	"PG_savepinned\000"
-.LASF50:
-	.ascii	"/home/user/Kernel/LG_Waggle_Kernel\000"
 	.ident	"GCC: (Sourcery G++ Lite 2010q1-188) 4.4.1"

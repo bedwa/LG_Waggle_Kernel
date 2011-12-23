@@ -1,5 +1,3 @@
 #!/bin/sh
 export ARCH=arm 
-export KBUILD_BUILD_VERSION="Waggle-KernelV.2"
-rm -rf $(find ramdisktools/ramdisk -name EMPTY_DIRECTORY -print)
 make cosmo_rev_1.1_defconfig && make && cp -af $(find . -name *.ko -print) ./mods

@@ -13,7 +13,7 @@
 @	compiled by GNU C version 4.3.2, GMP version 4.3.1, MPFR version 2.4.2.
 @ GGC heuristics: --param ggc-min-expand=97 --param ggc-min-heapsize=126692
 @ options passed:  -nostdinc
-@ -I/home/user/Kernel/LG_Waggle_Kernel/arch/arm/include -Iinclude
+@ -I/home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include -Iinclude
 @ -Iarch/arm/mach-omap2/include -Iarch/arm/plat-omap/include -iprefix
 @ /home/user/Kernel/tcc/bin/../lib/gcc/arm-none-eabi/4.4.1/ -isysroot
 @ /home/user/Kernel/tcc/bin/../arm-none-eabi -D__USES_INITFINI__
@@ -424,19 +424,19 @@ main:
 	.4byte	0x0
 	.4byte	0x0
 	.file 2 "include/asm-generic/int-ll64.h"
-	.file 3 "/home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/posix_types.h"
+	.file 3 "/home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/posix_types.h"
 	.file 4 "include/linux/types.h"
 	.file 5 "include/linux/capability.h"
-	.file 6 "/home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/outercache.h"
+	.file 6 "/home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/outercache.h"
 	.file 7 "include/linux/thread_info.h"
 	.file 8 "include/linux/time.h"
-	.file 9 "/home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/fpstate.h"
-	.file 10 "/home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/thread_info.h"
-	.file 11 "/home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/system.h"
+	.file 9 "/home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/fpstate.h"
+	.file 10 "/home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/thread_info.h"
+	.file 11 "/home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/system.h"
 	.file 12 "include/linux/sched.h"
-	.file 13 "/home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/processor.h"
+	.file 13 "/home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/processor.h"
 	.file 14 "include/linux/list.h"
-	.file 15 "/home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/spinlock_types.h"
+	.file 15 "/home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/spinlock_types.h"
 	.file 16 "include/linux/spinlock_types.h"
 	.file 17 "include/asm-generic/atomic-long.h"
 	.file 18 "include/linux/rbtree.h"
@@ -447,14 +447,14 @@ main:
 	.file 23 "include/linux/wait.h"
 	.file 24 "include/linux/kernel.h"
 	.file 25 "include/linux/completion.h"
-	.file 26 "/home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/page.h"
+	.file 26 "/home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/page.h"
 	.file 27 "include/linux/mm_types.h"
-	.file 28 "/home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/mmu.h"
+	.file 28 "/home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/mmu.h"
 	.file 29 "include/linux/mm.h"
 	.file 30 "include/asm-generic/cputime.h"
 	.file 31 "include/linux/rcupdate.h"
 	.file 32 "include/linux/sem.h"
-	.file 33 "/home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/signal.h"
+	.file 33 "/home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/signal.h"
 	.file 34 "include/asm-generic/signal-defs.h"
 	.file 35 "include/asm-generic/siginfo.h"
 	.file 36 "include/linux/signal.h"
@@ -471,7 +471,7 @@ main:
 	.file 47 "include/linux/cred.h"
 	.file 48 "include/linux/ioport.h"
 	.file 49 "include/linux/dma-mapping.h"
-	.file 50 "/home/user/Kernel/LG_Waggle_Kernel/arch/arm/include/asm/hwcap.h"
+	.file 50 "/home/user/Kernel/LG_Waggle_Kernel/Kernel/arch/arm/include/asm/hwcap.h"
 	.file 51 "include/linux/timex.h"
 	.file 52 "include/asm-generic/percpu.h"
 	.file 53 "include/linux/percpu_counter.h"
@@ -8227,8 +8227,6 @@ main:
 	.ascii	"ptrace_message\000"
 .LASF18:
 	.ascii	"__kernel_timer_t\000"
-.LASF675:
-	.ascii	"/home/user/Kernel/LG_Waggle_Kernel\000"
 .LASF631:
 	.ascii	"nr_cpus_allowed\000"
 .LASF194:
@@ -8825,6 +8823,8 @@ main:
 	.ascii	"exec_domain\000"
 .LASF113:
 	.ascii	"exit_state\000"
+.LASF675:
+	.ascii	"/home/user/Kernel/LG_Waggle_Kernel/Kernel\000"
 .LASF152:
 	.ascii	"cred_guard_mutex\000"
 .LASF415:

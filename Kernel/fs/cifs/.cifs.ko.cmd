@@ -1,1 +1,1 @@
-cmd_fs/cifs/cifs.ko := /home/user/Kernel/tcc/bin/arm-none-eabi-ld -EL -r  -T /home/user/Kernel/LG_Waggle_Kernel/scripts/module-common.lds --build-id -o fs/cifs/cifs.ko fs/cifs/cifs.o fs/cifs/cifs.mod.o
+cmd_fs/cifs/cifs.ko := /home/user/Kernel/tcc/bin/arm-none-eabi-ld -EL -r  -T /home/user/Kernel/LG_Waggle_Kernel/Kernel/scripts/module-common.lds --build-id -o fs/cifs/cifs.ko fs/cifs/cifs.o fs/cifs/cifs.mod.o
