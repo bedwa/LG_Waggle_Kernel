@@ -1,0 +1,7 @@
+on init
+    
+    # kernel log disable
+    mkdir /debug
+    mount debugfs debugfs /debug
+
+    write /debug/printkdebug/printk_disable_mode 1

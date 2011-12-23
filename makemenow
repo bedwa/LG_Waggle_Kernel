@@ -1,0 +1,7 @@
+#!/bin/sh
+cd Kernel 
+./buildme
+cd ../Ramdisk-Tools 
+./BimgmeF
+mv bootzip.zip ../Thrillz.zip
+cd ..

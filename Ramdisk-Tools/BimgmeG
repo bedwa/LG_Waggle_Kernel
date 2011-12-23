@@ -1,0 +1,8 @@
+#!/bin/sh
+cp ../Kernel/arch/arm/boot/zImage ./zImage
+cd temp2
+find ./* | cpio -o -H newc | gzip -v1  > ../ramdisk.cpio.gz
+cd ..
+mkimage -A ARM -T multi -n newboot -C None -a 0x80008000 -e 0x80008000 -d zImage:ramdisk.cpio.gz boot.img
+zip -r bootzip boot.img META-INF system
+rm zImage && rm boot.img && rm ramdisk.cpio.gz

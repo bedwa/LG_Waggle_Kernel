@@ -1,0 +1,68 @@
+
+#
+# The MTP service is started and stopped on demand.
+#
+
+service mtp /system/bin/lg_mtp_service
+  disabled
+on device-added-/devices/platform/musb_hdrc/gadget/mtp
+  start mtp
+on device-removed-/devices/platform/musb_hdrc/gadget/mtp
+  stop mtp
+
+
+#
+# The heaven muic can switch the usb connector to the communications
+# processor when a (dummy) communications functions appears.  It's not
+# yet clear when and how the device switches back to the application
+# processor.
+#
+
+on device-added-/devices/platform/musb_hdrc/gadget/communications
+  write /proc/driver/hmuic "9"
+
+on device-removed-/devices/platform/musb_hdrc/gadget/communications
+  write /proc/driver/hmuic "8"
+
+
+#
+# Select the file system image for USB cdrom
+#
+
+# service isomounter /system/bin/isomounter
+#   oneshot
+#   disabled
+
+# on device-added-/bus/platform/drivers/usb_mass_storage
+#   start isomounter
+
+#
+# Restart or stop the adb service depending on the USB operation mode.
+#
+# We don't check persist.service.adb.enable here.  If the user selected
+# an ADB personality he clearly wants ADB support.
+#
+# To use WiFi ADB without interruptions in all operation modes disable
+# these handlers and execute "setprop service.adb.tcp.port 5555" as
+# part of "on init".
+#
+
+on device-added-/devices/virtual/misc/android_adb
+   stop adbd
+   start adbd
+
+on device-removed-/devices/virtual/misc/android_adb
+   stop adbd
+
+#
+# The default usb gadget personality cannot be set earlier, or init
+# will not be able to react to uevents in a consistent way.
+#
+# Devices with multiple USB device modes will use applications like
+# UsbModeChoice to set customizable defaults, but simple devices with
+# just one USB mode might want to set a default in here.
+#
+#LGE_CHANGE_S,narasimha.chikka@lge.com,enable personality gadget with initial PID
+#service init_usb /system/bin/sh /system/bin/set_gadget_personality 90510
+#	oneshot
+#LGE_CHANGE_E,narasimha.chikka@lge.com,enable personality gadget with initial PID
